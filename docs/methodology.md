@@ -9,14 +9,23 @@ KBR/INSITE value-prop note prescribes).
 For furnace *f* with tubes *i* and time *t*:
 
 ```
-Delta_i(t)       = COT_i(t) − mean_j COT_j(t)          # deviation from the pack
+Delta_i(t)       = COT_i(t) − ref_i(t)                 # deviation from reference
 baseline_i(run)  = mean_{t in first 12 h of run} Delta_i(t)
 DeltaDelta_i(t)  = Delta_i(t) − baseline_i(run(t))     # run-normalised drift
 ```
 
-Tubes reading below 500 °C (offline / dead TC) are dropped from the pack mean so
+Tubes reading below 500 °C (offline / dead TC) are dropped from the reference so
 they cannot bias Delta. The baseline is re-snapshotted at the start of **every**
 run, mirroring the DCS "start-of-run" reset after a decoke.
+
+**Reference = the PASS average** (KBR control doc; and our own
+`delta_delta_report-7.pdf`: *"deviation … from its pass average"*). The feature
+and CLI pipelines compute `ref_i = mean of tube i's pass` via
+`compute_delta(cot, active, tube_pass=…)` — the single definition used
+throughout. The tube→pass map is ground-truth-validated (48 tubes/pass) and all
+192 tubes/furnace are available, so the pass average is computed over the full
+population and matches the DCS pass-average COT to ~0 °C. (The furnace pack mean
+is only a fallback when no pass map is supplied — not used in the pipeline.)
 
 Health indicators (operator-facing scalars): `dd_abs_max` (largest |DeltaDelta|
 across tubes — the decoke-trigger proxy), `dd_p95`, `delta_spread`, and the

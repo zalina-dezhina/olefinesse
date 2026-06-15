@@ -30,10 +30,13 @@ def _analyse(spark, catalog, furnace, start, end, bucket, use_long_tc, do_plots=
     # Delta-Delta figures need the raw tube frame; rebuild it cheaply from feat's
     # span via the same loader so we can render the per-tube views.
     if do_plots:
-        sub = cat.tags_for(catalog, furnace, ["tube_COT_long" if use_long_tc else "tube_COT"])
+        tc_role = "tube_COT_long" if use_long_tc else "tube_COT"
+        sub = cat.tags_for(catalog, furnace, [tc_role])
         cot = io_events.load_wide(spark, sub.ID.tolist(), start, end, bucket)
         crk = runsmod.cracking_mask(feat["feed_total"], cot)
-        delta = ddm.compute_delta(cot, crk)
+        # Delta referenced to the PASS average (KBR/DCS definition) throughout.
+        tube_pass = cat.tube_pass_map(catalog, furnace, tc_role)
+        delta = ddm.compute_delta(cot, crk, tube_pass=tube_pass)
         dd = ddm.compute_delta_delta(delta, runs)
         age = runsmod.run_age_days(cot.index, runs)
         for p in [
@@ -42,8 +45,11 @@ def _analyse(spark, catalog, furnace, start, end, bucket, use_long_tc, do_plots=
             plots.plot_delta_delta(dd, runs, furnace),
             plots.plot_dd_trajectories(dd, age, runs, furnace),
             plots.plot_health_vs_drivers(feat, runs, furnace),
+            plots.plot_pass_health(feat, runs, furnace),
+            plots.plot_pass_dd_distribution(dd, tube_pass, runs, furnace),
         ]:
-            print("   wrote", p)
+            if p:
+                print("   wrote", p)
 
         # Correlation suite
         corr = correlations.correlation_matrix(feat, method="spearman")
@@ -82,6 +88,8 @@ def main():
     catalog = cat.build_catalog(spark, refresh=args.refresh_catalog)
     print("Tag catalog (counts per furnace/role):")
     print(cat.summarize(catalog).to_string(), "\n")
+    print("Dense tube-COT instrumentation per furnace x pass:")
+    print(cat.summarize_passes(catalog, "tube_COT").to_string(), "\n")
 
     if args.command == "coverage":
         sub = cat.tags_for(catalog, args.furnace)

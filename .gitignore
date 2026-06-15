@@ -16,3 +16,16 @@ dist/
 .pytest_cache/
 .ruff_cache/
 .ipynb_checkpoints/
+.venv/
+venv/
+
+# editor / IDE / OS cruft (IDE atomic-write temps, swaps, etc.)
+*.tmp
+*.tmp.*
+*.swp
+*~
+.DS_Store
+.vscode/
+
+# Claude Code — keep shared settings.json trackable, ignore personal overrides
+.claude/settings.local.json

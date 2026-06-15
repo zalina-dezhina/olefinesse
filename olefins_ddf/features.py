@@ -39,6 +39,8 @@ from .io_events import load_wide
 # kg/h dilution steam -> Nm3/h (ideal gas, MW water 18.015, molar vol 22.414)
 _STEAM_KGH_TO_NM3H = 22.414 / 18.015
 
+_PASSES = ["A", "B", "C", "D"]
+
 
 def _species_col(sub: pd.DataFrame, wide: pd.DataFrame, role: str, token: str):
     """First loaded column for a role whose Description contains `token`."""
@@ -83,7 +85,10 @@ def build_feature_matrix(spark, catalog, furnace, start, end, bucket=30,
 
     cracking = runsmod.cracking_mask(feed_total, cot)
     runs = runsmod.segment_runs(cracking)
-    delta = ddm.compute_delta(cot, cracking)
+    # Delta is referenced to the PASS average (KBR/DCS definition), not the
+    # furnace pack mean. With full 48-tube/pass coverage this is unambiguous.
+    tube_pass = cat.tube_pass_map(catalog, furnace, tc_role)
+    delta = ddm.compute_delta(cot, cracking, tube_pass=tube_pass)
     dd = ddm.compute_delta_delta(delta, runs)
     health = ddm.health_indicators(delta, dd)
     rate = ddm.coking_rate(health["dd_abs_max"], runs)
@@ -119,6 +124,37 @@ def build_feature_matrix(spark, catalog, furnace, start, end, bucket=30,
     feat["eff_CH4"] = _species_col(sub, wide, "effluent_GC", "CH4")
     feat["eff_C2H6"] = _species_col(sub, wide, "effluent_GC", "C2H6")
     feat["eff_C3H8"] = _species_col(sub, wide, "effluent_GC", "C3H8")
+
+    # --- Per-pass levers + health ------------------------------------------
+    # Feed throughput and steam/HC are set per pass, so a pass running lean on
+    # steam cokes fastest; furnace totals average that signal away. dd_abs_max_<P>
+    # localises coking to the pass dragging the furnace toward a decoke.
+    for p in _PASSES:
+        fids = [i for i in cat.ids_for_pass(catalog, furnace, "feed_flow", p) if i in wide.columns]
+        sids = [i for i in cat.ids_for_pass(catalog, furnace, "dil_steam", p) if i in wide.columns]
+        f_p = wide[fids].sum(axis=1) if fids else pd.Series(np.nan, index=wide.index)
+        s_p = wide[sids].sum(axis=1) if sids else pd.Series(np.nan, index=wide.index)
+        feat[f"feed_{p}"] = f_p
+        feat[f"steam_{p}"] = s_p
+        # Ratio only where the pass is actually cracking: a feed floor at 30% of
+        # the pass's running level (cf. runs.FEED_FRAC) avoids the ratio blowing
+        # up as a single pass's feed dips toward zero at decoke transitions.
+        if f_p.notna().any() and f_p.max() > 0:
+            running = f_p[f_p > f_p.max() * 0.1].median()
+            valid = f_p > runsmod.FEED_FRAC * running
+        else:
+            valid = pd.Series(False, index=wide.index)
+        feat[f"steam_hc_{p}"] = (s_p / f_p).where(valid)
+    # spread of the steam/HC ratio across passes - the uneven-steam coking driver
+    hc_cols = [f"steam_hc_{p}" for p in _PASSES]
+    feat["steam_hc_spread"] = feat[hc_cols].max(axis=1) - feat[hc_cols].min(axis=1)
+
+    tube_pass = cat.tube_pass_map(catalog, furnace, tc_role)
+    pp = ddm.per_pass_health(dd, tube_pass)
+    for c in pp.columns:
+        feat[c] = pp[c]
+    feat["worst_pass"] = ddm.worst_pass(pp)
+
     # Run structure
     feat["run_id"] = runsmod.run_id_series(wide.index, runs)
     feat["run_age_days"] = runsmod.run_age_days(wide.index, runs)

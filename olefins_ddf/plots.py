@@ -51,7 +51,7 @@ def plot_delta(delta, runs, furnace):
     for c in delta.columns:
         ax.plot(delta.index, delta[c], lw=0.4, alpha=0.7)
     _shade(ax, runs); ax.axhline(0, color="k", lw=0.6)
-    ax.set_title(f"{furnace} - Delta: per-tube deviation from pack-mean COT")
+    ax.set_title(f"{furnace} - Delta: per-tube deviation from pass-average COT")
     ax.set_ylabel("Delta (°C)")
     return _save(fig, f"{furnace}_02_delta.png")
 
@@ -99,6 +99,85 @@ def plot_health_vs_drivers(feat, runs, furnace):
         _shade(ax, runs)
     d.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
     return _save(fig, f"{furnace}_05_health_vs_drivers.png")
+
+
+def plot_pass_health(feat, runs, furnace):
+    """Per-pass coking vs per-pass steam/HC - does the leanest-steam pass coke
+    worst? Top: |Delta-Delta| max within each pass. Bottom: steam/HC per pass."""
+    passes = ["A", "B", "C", "D"]
+    dd_cols = [f"dd_abs_max_{p}" for p in passes if f"dd_abs_max_{p}" in feat]
+    hc_cols = [f"steam_hc_{p}" for p in passes if f"steam_hc_{p}" in feat]
+    if not dd_cols:
+        return None
+    colors = dict(zip(passes, plt.cm.tab10(np.linspace(0, 0.4, 4))))
+    fig, axes = plt.subplots(2, 1, figsize=(13, 7), sharex=True)
+    for c in dd_cols:
+        p = c.split("_")[-1]
+        axes[0].plot(feat.index, feat[c], lw=0.7, color=colors[p], label=f"pass {p}")
+    _shade(axes[0], runs); axes[0].axhline(0, color="k", lw=0.6)
+    axes[0].set_ylabel("|ΔΔ| max (°C)"); axes[0].legend(fontsize=8, ncol=4)
+    axes[0].set_title(f"{furnace} - per-pass furnace health (worst-tube Delta-Delta by pass)")
+    for c in hc_cols:
+        p = c.split("_")[-1]
+        axes[1].plot(feat.index, feat[c], lw=0.7, color=colors[p], label=f"pass {p}")
+    _shade(axes[1], runs)
+    axes[1].set_ylabel("steam/HC\n(KG/NM3)"); axes[1].legend(fontsize=8, ncol=4)
+    axes[1].xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
+    axes[1].set_title("Per-pass steam/HC ratio (the per-pass coking lever)")
+    return _save(fig, f"{furnace}_06_pass_health.png")
+
+
+def plot_pass_dd_distribution(dd, tube_pass, runs, furnace, smooth_hours: float = 6.0):
+    """One subplot per pass: the distribution of per-tube Delta-Delta over time.
+
+    Shows median & mean Delta-Delta across the pass's ~48 tubes, the inter-quartile
+    band, and the full min–max shaded range — so you can see the *spread* of tube
+    drift within each pass widen as coke lays down (a tube pulling away from the
+    pack is the decoke signal). Expects `dd` referenced to the pass average.
+    """
+    passes = ["A", "B", "C", "D"]
+    cols = {p: [c for c in dd.columns if tube_pass.get(c) == p] for p in passes}
+    present = [p for p in passes if cols[p]]
+    if not present:
+        return None
+    step_h = (dd.index[1] - dd.index[0]).total_seconds() / 3600.0
+    win = max(1, int(smooth_hours / max(step_h, 1e-9)))
+    sm = lambda s: s.rolling(win, min_periods=1, center=True).median() if win > 1 else s
+
+    # Pre-compute the (smoothed) band series per pass, then set a robust shared
+    # y-limit from the band percentiles so rare single-TC spikes don't squash the
+    # informative range (the IQR widening as tubes diverge).
+    S, his, los = {}, [], []
+    for p in present:
+        sub = dd[cols[p]]
+        S[p] = dict(lo=sm(sub.min(axis=1)), hi=sm(sub.max(axis=1)),
+                    q1=sm(sub.quantile(0.25, axis=1)), q3=sm(sub.quantile(0.75, axis=1)),
+                    med=sm(sub.median(axis=1)), mean=sm(sub.mean(axis=1)))
+        his.append(S[p]["hi"]); los.append(S[p]["lo"])
+    hi_all, lo_all = pd.concat(his), pd.concat(los)
+    ymax = max(np.nanpercentile(hi_all, 99), 10) * 1.15
+    ymin = min(np.nanpercentile(lo_all, 1), -10) * 1.15
+
+    fig, axes = plt.subplots(len(present), 1, figsize=(13, 2.5 * len(present)),
+                             sharex=True, sharey=True)
+    if len(present) == 1:
+        axes = [axes]
+    for ax, p in zip(axes, present):
+        d, idx = S[p], dd.index
+        ax.fill_between(idx, d["lo"], d["hi"], color="steelblue", alpha=0.12, lw=0, label="min–max")
+        ax.fill_between(idx, d["q1"], d["q3"], color="steelblue", alpha=0.30, lw=0, label="IQR (p25–p75)")
+        ax.plot(idx, d["med"], color="navy", lw=0.9, label="median")
+        ax.plot(idx, d["mean"], color="crimson", lw=0.7, ls="--", label="mean")
+        _shade(ax, runs); ax.axhline(0, color="k", lw=0.6)
+        ax.set_ylim(ymin, ymax)
+        ax.set_ylabel(f"Pass {p}\nΔΔ (°C)")
+        ax.set_title(f"Pass {p} — {len(cols[p])} tubes  (min–max clipped to p1–p99)",
+                     fontsize=8, loc="left")
+    axes[0].legend(fontsize=7, ncol=4, loc="upper left")
+    axes[-1].xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
+    fig.suptitle(f"{furnace} — per-pass Delta-Delta distribution across tubes "
+                 "(vs pass average; grey = decoke/offline)", y=0.995)
+    return _save(fig, f"{furnace}_11_pass_dd_distribution.png")
 
 
 def plot_fleet_health(fleet: pd.DataFrame, smooth_hours: float = 24.0):
