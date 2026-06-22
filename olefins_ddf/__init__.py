@@ -8,17 +8,6 @@ builds a unified feature matrix, and runs correlation analysis.
 
 See docs/ for the methodology, data dictionary, and the running research log.
 """
-from . import (
-    catalog,
-    config,
-    correlations,
-    deltadelta,
-    features,
-    io_events,
-    plots,
-    runs,
-)
-
 __all__ = [
     "catalog", "config", "correlations", "deltadelta", "features",
     "io_events", "plots", "runs",

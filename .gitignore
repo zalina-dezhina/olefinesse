@@ -1,3 +1,7 @@
+# environment / secrets — never commit these
+.env
+.env.local
+
 # data exports / generated artifacts
 *.xlsx
 output/
