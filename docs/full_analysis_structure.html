@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Full Analysis Structure — Olefins Delta-Delta</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f7f6f3;--bg3:#eeedea;
+  --text:#1a1a18;--text2:#5a5a56;--text3:#8a8a84;
+  --border:rgba(0,0,0,.10);--border2:rgba(0,0,0,.18);
+  --tgt:#085041;--tgt-bg:#e1f5ee;--tgt-bd:#1d9e75;
+  --lev:#3c3489;--lev-bg:#eeedfe;--lev-bd:#7f77dd;
+  --feed:#633806;--feed-bg:#faeeda;--feed-bd:#ef9f27;
+  --dec:#993c1d;--dec-bg:#faece7;--dec-bd:#d85a30;
+  --yld:#185fa5;--yld-bg:#e6f1fb;--yld-bd:#378add;
+  --red:#a32d2d;--red-bg:#fcebeb;--red-bd:#e24b4a;
+}
+@media(prefers-color-scheme:dark){:root{--bg:#1a1a18;--bg2:#242422;--bg3:#2e2e2c;--text:#f0efe8;--text2:#a8a8a0;--text3:#686860;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.15);--tgt:#5dcaa5;--tgt-bg:#04342c;--tgt-bd:#1d9e75;--lev:#afa9ec;--lev-bg:#26215c;--lev-bd:#7f77dd;--feed:#fac775;--feed-bg:#412402;--feed-bd:#ef9f27;--dec:#f0997b;--dec-bg:#4a1b0c;--dec-bd:#d85a30;--red:#f7c1c1;--red-bg:#501313;--red-bd:#e24b4a;--yld:#7ab9f0;--yld-bg:#0c2a4a;--yld-bd:#378add;}}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);padding:20px;font-size:12px;max-width:960px;margin:0 auto}
+h1{font-size:20px;font-weight:700;margin-bottom:3px}
+.subtitle{font-size:12px;color:var(--text3);margin-bottom:16px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.lang-btn{font-size:11px;padding:4px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:inherit;white-space:nowrap;margin-top:4px}
+.sec{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin:18px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+
+/* DATA CUBE */
+.cube-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.dim{padding:12px 14px;border-radius:8px;border:1px solid}
+.dim-num{font-size:30px;font-weight:700}
+.dim-name{font-size:12px;font-weight:600;margin:2px 0 4px}
+.dim-items{font-size:10px;color:var(--text3);line-height:1.7}
+.dim-why{font-size:10px;margin-top:8px;padding:6px 9px;border-radius:5px;line-height:1.55}
+.math-row{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);margin-bottom:4px}
+.chip{padding:4px 10px;border-radius:6px;font-weight:600;font-size:11px}
+
+/* STAGES */
+.stage{display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:7px}
+.stage-num{width:36px;min-width:36px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff}
+.stage-body{padding:9px 12px;flex:1}
+.stage-title{font-size:12px;font-weight:600;margin-bottom:4px}
+.pills{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px}
+.pill{font-size:9px;font-weight:600;padding:2px 7px;border-radius:10px}
+.stage-desc{font-size:11px;color:var(--text2);line-height:1.6}
+.stage-nb{font-size:9px;font-family:'SF Mono',monospace;background:var(--bg3);padding:2px 7px;border-radius:4px;margin-top:4px;display:inline-block}
+
+/* CODE TREE */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tree{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'SF Mono',monospace;font-size:10px;line-height:1.9}
+.d{color:var(--feed);font-weight:600}
+.f{color:var(--text2)}
+.co{color:var(--text3);font-style:italic;font-family:inherit}
+.nb{color:var(--lev);font-weight:600}
+.badge{display:inline-block;font-size:8px;font-weight:600;padding:1px 5px;border-radius:7px;margin-left:3px;vertical-align:middle}
+.bg{background:var(--tgt-bg);color:var(--tgt);border:1px solid var(--tgt-bd)}
+.bp{background:var(--lev-bg);color:var(--lev);border:1px solid var(--lev-bd)}
+.bf{background:var(--feed-bg);color:var(--feed);border:1px solid var(--feed-bd)}
+.br{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+
+/* RULES */
+.rules{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rule{background:var(--bg2);border-left:3px solid;border-radius:0 7px 7px 0;padding:9px 11px}
+.rule-t{font-size:11px;font-weight:600;margin-bottom:4px}
+.rule-b{font-size:10px;color:var(--text2);line-height:1.6}
+
+.footer{margin-top:20px;font-size:10px;color:var(--text3);text-align:center;padding-top:10px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1><span class="en-text">Full Analysis Structure — Olefins Delta-Delta</span><span class="ru-text">Полная структура анализа — Олефины Delta-Delta</span></h1>
+    <div class="subtitle"><span class="en-text">Code + output + order · Indorama Eleme · Last updated: 2026-06-23</span><span class="ru-text">Код + данные + порядок · Indorama Eleme · Обновлено: 2026-06-23</span></div>
+  </div>
+  <button class="lang-btn" onclick="toggleLang()">RU / EN</button>
+</div>
+
+<!-- 1. DATA SPACE -->
+<div class="sec"><span class="en-text">1 — The data space</span><span class="ru-text">1 — Пространство данных</span></div>
+<div class="cube-grid">
+  <div class="dim" style="background:var(--dec-bg);border-color:var(--dec-bd)">
+    <div class="dim-num" style="color:var(--dec)">7</div>
+    <div class="dim-name" style="color:var(--dec)"><span class="en-text">Furnaces</span><span class="ru-text">Печей</span></div>
+    <div class="dim-items">1HA · 1HB · 1HC · 1HD · 1HE · 1HF · 1HG</div>
+    <div class="dim-why" style="background:var(--dec-bg);color:var(--dec)">
+      <span class="en-text"><strong>Why 7 separate?</strong> Each furnace runs independently. Different operators, conditions, coking rates. Never average raw correlations across furnaces without first confirming they behave the same.</span>
+      <span class="ru-text"><strong>Почему 7 раздельно?</strong> Каждая печь работает независимо. Разные операторы, условия, скорости коксования. Никогда не усреднять сырые корреляции по печам без подтверждения одинакового поведения.</span>
+    </div>
+  </div>
+  <div class="dim" style="background:var(--lev-bg);border-color:var(--lev-bd)">
+    <div class="dim-num" style="color:var(--lev)">4</div>
+    <div class="dim-name" style="color:var(--lev)"><span class="en-text">Passes / furnace</span><span class="ru-text">Пасса / печь</span></div>
+    <div class="dim-items">A · B · C · D<br>48 <span class="en-text">tubes each · independent feed + steam</span><span class="ru-text">трубок · независимая подача + пар</span></div>
+    <div class="dim-why" style="background:var(--lev-bg);color:var(--lev)">
+      <span class="en-text"><strong>Why passes matter?</strong> Each has own feed + steam control. One pass can coke faster if it gets less steam. Analyse furnace-wide FIRST — pass differences are secondary and smaller.</span>
+      <span class="ru-text"><strong>Почему пассы важны?</strong> У каждого своя подача + пар. Один пасс коксует быстрее при меньшем паре. Сначала вся печь — различия пассов вторичны и меньше.</span>
+    </div>
+  </div>
+  <div class="dim" style="background:var(--tgt-bg);border-color:var(--tgt-bd)">
+    <div class="dim-num" style="color:var(--tgt)">~16</div>
+    <div class="dim-name" style="color:var(--tgt)"><span class="en-text">Cycles / furnace</span><span class="ru-text">Циклов / печь</span></div>
+    <div class="dim-items"><span class="en-text">Feb 2025 → Mar 2026<br>5–31 days each · NOT fixed 25 d</span><span class="ru-text">Фев 2025 → Мар 2026<br>5–31 дней · НЕ фиксированные 25 дн</span></div>
+    <div class="dim-why" style="background:var(--tgt-bg);color:var(--tgt)">
+      <span class="en-text"><strong>Why pool cycles?</strong> 16 cycles = 16 experiments. Pool for correlations (more data = stronger signal). Keep separate for trajectories (index by run_age_days to overlay).</span>
+      <span class="ru-text"><strong>Почему объединять циклы?</strong> 16 циклов = 16 экспериментов. Объединять для корреляций. Хранить раздельно для траекторий (индекс run_age_days для наложения).</span>
+    </div>
+  </div>
+</div>
+<div class="math-row">
+  <span class="chip" style="background:var(--dec-bg);color:var(--dec);border:1px solid var(--dec-bd)">7 <span class="en-text">furnaces</span><span class="ru-text">печей</span></span>
+  <span style="color:var(--text3);font-weight:600">×</span>
+  <span class="chip" style="background:var(--lev-bg);color:var(--lev);border:1px solid var(--lev-bd)">4 <span class="en-text">passes</span><span class="ru-text">пасса</span></span>
+  <span style="color:var(--text3);font-weight:600">×</span>
+  <span class="chip" style="background:var(--tgt-bg);color:var(--tgt);border:1px solid var(--tgt-bd)">~16 <span class="en-text">cycles</span><span class="ru-text">циклов</span></span>
+  <span style="color:var(--text3);font-weight:600">×</span>
+  <span class="chip" style="background:var(--feed-bg);color:var(--feed);border:1px solid var(--feed-bd)">48 <span class="en-text">tubes</span><span class="ru-text">трубок</span></span>
+  <span style="color:var(--text3);font-weight:600">=</span>
+  <span class="chip" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)">~21 504 <span class="en-text">tube-cycles to understand</span><span class="ru-text">трубо-циклов для понимания</span></span>
+</div>
+
+<!-- 2. ANALYSIS ORDER -->
+<div class="sec"><span class="en-text">2 — Correct analysis order: coarse → fine</span><span class="ru-text">2 — Правильный порядок анализа: от общего к частному</span></div>
+
+<div class="stage" style="border-color:var(--tgt-bd)">
+  <div class="stage-num" style="background:var(--tgt)">1</div>
+  <div class="stage-body">
+    <div class="stage-title"><span class="en-text">One furnace · All passes together · All cycles together</span><span class="ru-text">Одна печь · Все пассы вместе · Все циклы вместе</span></div>
+    <div class="pills">
+      <span class="pill" style="background:var(--dec-bg);color:var(--dec);border:1px solid var(--dec-bd)">1HA only</span>
+      <span class="pill" style="background:var(--lev-bg);color:var(--lev);border:1px solid var(--lev-bd)">A+B+C+D pooled</span>
+      <span class="pill" style="background:var(--tgt-bg);color:var(--tgt);border:1px solid var(--tgt-bd)">all 16 cycles pooled</span>
+    </div>
+    <div class="stage-desc"><span class="en-text"><strong>Why first?</strong> Get the overall picture. Signal: <code>dd_abs_max</code> = worst tube across ALL passes. Question: which drivers (COT, steam, feed quality) correlate with overall furnace health? Simplest, most powerful question. Master it before adding complexity.</span><span class="ru-text"><strong>Почему первым?</strong> Получить общую картину. Сигнал: <code>dd_abs_max</code> = худшая трубка ВСЕХ пассов. Вопрос: какие драйверы коррелируют с общим здоровьем печи? Простейший и самый мощный вопрос. Освоить до добавления сложности.</span></div>
+    <div><span class="stage-nb">notebooks/00b_clean/ → 01_tags/ → 02a_corr_furnace/</span></div>
+  </div>
+</div>
+
+<div class="stage" style="border-color:var(--lev-bd)">
+  <div class="stage-num" style="background:var(--lev)">2</div>
+  <div class="stage-body">
+    <div class="stage-title"><span class="en-text">One furnace · Per pass · All cycles together</span><span class="ru-text">Одна печь · По пассам · Все циклы вместе</span></div>
+    <div class="pills">
+      <span class="pill" style="background:var(--dec-bg);color:var(--dec);border:1px solid var(--dec-bd)">1HA only</span>
+      <span class="pill" style="background:var(--lev-bg);color:var(--lev);border:1px solid var(--lev-bd)">A · B · C · D separate</span>
+      <span class="pill" style="background:var(--tgt-bg);color:var(--tgt);border:1px solid var(--tgt-bd)">all 16 cycles pooled</span>
+    </div>
+    <div class="stage-desc"><span class="en-text"><strong>Why second?</strong> Ask: are passes different? Uses <code>dd_abs_max_A/B/C/D</code>. Does Pass A coke faster than D? Does the pass with less steam go first? Only makes sense AFTER you know the furnace-wide picture.</span><span class="ru-text"><strong>Почему вторым?</strong> Вопрос: пассы отличаются? Использует <code>dd_abs_max_A/B/C/D</code>. Пасс A коксует быстрее D? Пасс с меньшим паром первый? Имеет смысл ТОЛЬКО после картины всей печи.</span></div>
+    <div><span class="stage-nb">notebooks/02b_corr_passes/</span></div>
+  </div>
+</div>
+
+<div class="stage" style="border-color:var(--feed-bd)">
+  <div class="stage-num" style="background:var(--feed)">3</div>
+  <div class="stage-body">
+    <div class="stage-title"><span class="en-text">All 7 furnaces · Furnace-wide · All cycles — run in parallel</span><span class="ru-text">Все 7 печей · Вся печь · Все циклы — запуск параллельно</span></div>
+    <div class="pills">
+      <span class="pill" style="background:var(--dec-bg);color:var(--dec);border:1px solid var(--dec-bd)">1HA…1HG all</span>
+      <span class="pill" style="background:var(--lev-bg);color:var(--lev);border:1px solid var(--lev-bd)">A+B+C+D pooled</span>
+      <span class="pill" style="background:var(--tgt-bg);color:var(--tgt);border:1px solid var(--tgt-bd)">all cycles per furnace</span>
+    </div>
+    <div class="stage-desc"><span class="en-text"><strong>Why third?</strong> Run stages 1+2 on all 7 via <code>bash run_all_furnaces.sh</code> (parallel, independent). Then compare: are correlations consistent? If 1HA says COT(+) and 1HF says COT(−) that is a finding, not a mistake.</span><span class="ru-text"><strong>Почему третьим?</strong> Запустить стадии 1+2 на всех 7 через <code>bash run_all_furnaces.sh</code> (параллельно, независимо). Потом сравнить: корреляции одинаковы? Если 1HA: COT(+) а 1HF: COT(−) — это находка, не ошибка.</span></div>
+    <div><span class="stage-nb">bash run_all_furnaces.sh → notebooks/00_summary/</span></div>
+  </div>
+</div>
+
+<div class="stage" style="border-color:var(--red-bd)">
+  <div class="stage-num" style="background:var(--red)">4</div>
+  <div class="stage-body">
+    <div class="stage-title"><span class="en-text">Fleet forecaster · All furnaces pooled · All cycles · Indexed by run_age</span><span class="ru-text">Форсайтер флота · Все печи объединены · Все циклы · Индексация по run_age</span></div>
+    <div class="pills">
+      <span class="pill" style="background:var(--dec-bg);color:var(--dec);border:1px solid var(--dec-bd)">all 7 furnaces pooled</span>
+      <span class="pill" style="background:var(--tgt-bg);color:var(--tgt);border:1px solid var(--tgt-bd)">~700 cycles (2019+)</span>
+      <span class="pill" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)">Phase 2</span>
+    </div>
+    <div class="stage-desc"><span class="en-text"><strong>Why last?</strong> Needs validated causal drivers from stages 1–3. Pool all clean cycles (7 furnaces × 16 + long history = ~700 runs). Build: "given COT, steam, C5+ at run start → predict dd_abs_max at day 15". The KBR/INSITE deliverable.</span><span class="ru-text"><strong>Почему последним?</strong> Нужны проверенные причинные драйверы из стадий 1–3. Объединить все чистые циклы (~700 прогонов). Построить: "при COT, паре, C5+ на старте → предсказать dd_abs_max на день 15". Цель KBR/INSITE.</span></div>
+    <div><span class="stage-nb">notebooks/05_forecaster/ → output/fleet/05_forecaster/</span></div>
+  </div>
+</div>
+
+<!-- 3. CODE + OUTPUT STRUCTURE -->
+<div class="sec"><span class="en-text">3 — Code + output folder structure</span><span class="ru-text">3 — Структура кода + папок с данными</span></div>
+<div class="two-col">
+  <div>
+    <div style="font-size:10px;font-weight:600;color:var(--text3);margin-bottom:5px">📓 notebooks/</div>
+    <div class="tree">
+<div><span class="d">notebooks/</span></div>
+<div>&nbsp;&nbsp;<span class="d">00b_clean/</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nb">notebook_00b_clean_extraction.ipynb</span> <span class="badge bg">✅ ready</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="f">README.md</span></div>
+<div>&nbsp;&nbsp;<span class="d">01_tags/</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nb">notebook_01_tag_inspection.ipynb</span> <span class="badge bp">🔜 next</span></div>
+<div>&nbsp;&nbsp;<span class="d">02a_corr_furnace/</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nb">notebook_02a_correlations_furnace.ipynb</span> <span class="badge bp">🔜 next</span></div>
+<div>&nbsp;&nbsp;<span class="d">02b_corr_passes/</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nb">notebook_02b_correlations_passes.ipynb</span> <span class="badge" style="background:var(--bg3);color:var(--text3);border:1px solid var(--border2)">📋 planned</span></div>
+<div>&nbsp;&nbsp;<span class="d">03_trajectories/</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nb">notebook_03_trajectories.ipynb</span> <span class="badge" style="background:var(--bg3);color:var(--text3);border:1px solid var(--border2)">📋 planned</span></div>
+<div>&nbsp;&nbsp;<span class="d">00_summary/</span> <span class="badge bf">fleet</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nb">notebook_00_fleet_summary.ipynb</span></div>
+<div>&nbsp;&nbsp;<span class="d">05_forecaster/</span> <span class="badge br">phase 2</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nb">notebook_05_forecaster.ipynb</span></div>
+<br>
+<div><span class="d">run_all_furnaces.sh</span> <span class="co"><span class="en-text"># papermill parallel runner</span><span class="ru-text"># параллельный запуск</span></span></div>
+    </div>
+  </div>
+  <div>
+    <div style="font-size:10px;font-weight:600;color:var(--text3);margin-bottom:5px">📁 output/</div>
+    <div class="tree">
+<div><span class="d">output/</span></div>
+<div>&nbsp;&nbsp;<span class="d">1HA/</span> <span class="co"><span class="en-text"># same for 1HB…1HG</span><span class="ru-text"># то же для 1HB…1HG</span></span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="d">00b_clean/</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="f">1HA_clean.parquet</span> <span class="co"><span class="en-text"># THE source</span><span class="ru-text"># ЕДИНСТВЕННЫЙ источник</span></span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="f">run_windows.csv</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="f">00b_clean_extraction.png</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="d">01_tags/</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="f">tag_anomaly_inventory.csv</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="f">01_raw_cot.png …</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="d">02a_corr_furnace/</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="f">02a_heatmap.png &nbsp;02a_driver_class.csv</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="d">02b_corr_passes/</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="f">02b_passA.png … 02b_passD.png</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="d">03_trajectories/</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="f">03_dd_by_run_age.png</span></div>
+<div>&nbsp;&nbsp;<span class="d">1HB/ … 1HG/</span> <span class="co"><span class="en-text"># identical structure</span><span class="ru-text"># идентичная структура</span></span></div>
+<div>&nbsp;&nbsp;<span class="d">fleet/</span> <span class="badge bf">cross-furnace only</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="d">00_summary/</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="f">fleet_run_lengths.png &nbsp;fleet_corr_compare.png</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="d">05_forecaster/</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="f">model.pkl &nbsp;fleet_forecast.png</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. KEY RULES -->
+<div class="sec"><span class="en-text">4 — Key rules: when to merge, when to keep separate</span><span class="ru-text">4 — Ключевые правила: когда объединять, когда держать раздельно</span></div>
+<div class="rules">
+  <div class="rule" style="border-color:var(--dec-bd)">
+    <div class="rule-t" style="color:var(--dec)"><span class="en-text">Furnaces — always separate first</span><span class="ru-text">Печи — всегда раздельно сначала</span></div>
+    <div class="rule-b"><span class="en-text">Run notebooks 00b→03 independently per furnace. Merge into fleet/ only to pool trajectories for the forecaster. Never average raw correlations across furnaces.</span><span class="ru-text">Запускать ноутбуки 00b→03 независимо на каждую печь. Объединять в fleet/ только для траекторий форсайтера. Никогда не усреднять сырые корреляции по печам.</span></div>
+  </div>
+  <div class="rule" style="border-color:var(--lev-bd)">
+    <div class="rule-t" style="color:var(--lev)"><span class="en-text">Passes — furnace-wide first, per-pass second</span><span class="ru-text">Пассы — сначала вся печь, потом по пассам</span></div>
+    <div class="rule-b"><span class="en-text">Start with dd_abs_max (all passes). Move to dd_abs_max_A/B/C/D only after you understand the furnace picture. Pass differences are smaller than furnace differences.</span><span class="ru-text">Начинать с dd_abs_max (все пассы). Переходить к dd_abs_max_A/B/C/D только после понимания картины печи. Различия пассов меньше различий печей.</span></div>
+  </div>
+  <div class="rule" style="border-color:var(--tgt-bd)">
+    <div class="rule-t" style="color:var(--tgt)"><span class="en-text">Cycles — pool for correlations, separate for trajectories</span><span class="ru-text">Циклы — вместе для корреляций, раздельно для траекторий</span></div>
+    <div class="rule-b"><span class="en-text">For correlations: pool all 16 cycles (one DataFrame per furnace). For trajectories: keep each cycle indexed by run_age_days so you can overlay and compare them.</span><span class="ru-text">Для корреляций: объединить все 16 циклов (один DataFrame на печь). Для траекторий: хранить каждый цикл с индексом run_age_days для наложения.</span></div>
+  </div>
+  <div class="rule" style="border-color:var(--feed-bd)">
+    <div class="rule-t" style="color:var(--feed)"><span class="en-text">Output rule: file lives where its data came from</span><span class="ru-text">Правило файлов: файл там откуда его данные</span></div>
+    <div class="rule-b"><span class="en-text">Only 1HA data used → output/1HA/. Required ≥2 furnaces → output/fleet/. Pass identity mattered → .../02b_corr_passes/. Clean once in 00b. Analyse many times in 01–05. Never query Databricks after 00b.</span><span class="ru-text">Только данные 1HA → output/1HA/. ≥2 печей → output/fleet/. Важен пасс → .../02b_corr_passes/. Очистить один раз в 00b. Анализировать многократно в 01–05. Никогда не запрашивать Databricks после 00b.</span></div>
+  </div>
+</div>
+
+<div class="footer">
+  <span class="en-text">olefins_ddf project · Indorama Eleme · docs/full_analysis_structure.html · See also: tag_map.html · analysis_structure.html</span>
+  <span class="ru-text">Проект olefins_ddf · Indorama Eleme · docs/full_analysis_structure.html · Также: tag_map.html · analysis_structure.html</span>
+</div>
+
+<script>
+let lang='en';
+function toggleLang(){
+  lang=lang==='en'?'ru':'en';
+  document.querySelectorAll('.en-text').forEach(el=>el.style.display=lang==='en'?'':'none');
+  document.querySelectorAll('.ru-text').forEach(el=>el.style.display=lang==='ru'?'':'none');
+  document.querySelector('.lang-btn').textContent=lang==='en'?'RU / EN':'EN / RU';
+}
+document.querySelectorAll('.ru-text').forEach(el=>el.style.display='none');
+</script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analysis Structure — Olefins Delta-Delta Project</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f7f6f3;--bg3:#eeedea;
+  --text:#1a1a18;--text2:#5a5a56;--text3:#8a8a84;
+  --border:rgba(0,0,0,0.10);--border2:rgba(0,0,0,0.18);
+  --tgt:#085041;--tgt-bg:#e1f5ee;--tgt-bd:#1d9e75;
+  --lev:#3c3489;--lev-bg:#eeedfe;--lev-bd:#7f77dd;
+  --feed:#633806;--feed-bg:#faeeda;--feed-bd:#ef9f27;
+  --dec:#993c1d;--dec-bg:#faece7;--dec-bd:#d85a30;
+  --yld:#185fa5;--yld-bg:#e6f1fb;--yld-bd:#378add;
+  --red:#a32d2d;--red-bg:#fcebeb;--red-bd:#e24b4a;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#1a1a18;--bg2:#242422;--bg3:#2e2e2c;--text:#f0efe8;--text2:#a8a8a0;--text3:#686860;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);--tgt:#5dcaa5;--tgt-bg:#04342c;--tgt-bd:#1d9e75;--lev:#afa9ec;--lev-bg:#26215c;--lev-bd:#7f77dd;--feed:#fac775;--feed-bg:#412402;--feed-bd:#ef9f27;--dec:#f0997b;--dec-bg:#4a1b0c;--dec-bd:#d85a30;--red:#f7c1c1;--red-bg:#501313;--red-bd:#e24b4a;--yld:#7ab9f0;--yld-bg:#0c2a4a;--yld-bd:#378add;}
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);padding:20px;font-size:12px;max-width:900px;margin:0 auto}
+
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+h1{font-size:18px;font-weight:700}
+.subtitle{font-size:12px;color:var(--text3);margin-top:2px}
+.lang-btn{font-size:11px;padding:4px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:inherit}
+
+.section-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin:18px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+
+/* Scope cards */
+.scope-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.scope-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.scope-num{font-size:26px;font-weight:700;color:var(--tgt)}
+.scope-label{font-size:11px;color:var(--text2);margin-top:2px}
+.scope-sub{font-size:10px;color:var(--text3);margin-top:3px}
+
+/* Hierarchy */
+.tree{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:16px}
+.tree-row{display:flex;align-items:flex-start;gap:8px;padding:4px 0}
+.ti1{margin-left:20px}.ti2{margin-left:40px}.ti3{margin-left:60px}
+.tree-icon{font-size:14px;width:20px;flex-shrink:0;margin-top:1px}
+.tree-label{font-size:12px;font-weight:600;color:var(--text)}
+.tree-sub{font-size:11px;color:var(--text3);margin-left:6px}
+.tree-line{width:1px;height:10px;background:var(--border2);margin-left:29px}
+
+/* Timeline */
+.tl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:16px}
+.tl-bar{display:flex;height:32px;border-radius:6px;overflow:hidden;margin:8px 0 6px;gap:1px}
+.tl-seg{display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;letter-spacing:.03em}
+.tl-seg.cut{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+.tl-seg.clean{background:var(--tgt-bg);color:var(--tgt);border:1px solid var(--tgt-bd)}
+.tl-seg.decoke{background:var(--bg3);color:var(--text3);border:1px solid var(--border2)}
+.tl-seg.unknown{background:var(--lev-bg);color:var(--lev);border:1px solid var(--lev-bd)}
+.tl-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.tl-li{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text2)}
+.tl-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+
+/* 3 criteria box */
+.criteria{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+.crit-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.crit-num{font-size:20px;font-weight:700;color:var(--feed)}
+.crit-title{font-size:11px;font-weight:600;color:var(--text);margin:2px 0}
+.crit-body{font-size:10px;color:var(--text2);line-height:1.6}
+.crit-code{font-family:monospace;font-size:10px;background:var(--bg3);padding:1px 5px;border-radius:3px}
+
+/* Analysis grid */
+.analysis-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.a-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 13px}
+.a-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px}
+.a-row{font-size:11px;color:var(--text2);padding:2px 0;display:flex;gap:6px;align-items:baseline}
+.a-row::before{content:'→';color:var(--text3);font-size:10px;flex-shrink:0}
+
+/* Pipeline */
+.pipeline{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin-bottom:8px}
+.pipe-step{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px 12px;font-size:11px;font-weight:500;color:var(--text);text-align:center;min-width:100px}
+.pipe-step .ps-num{font-size:9px;color:var(--text3);margin-bottom:2px}
+.pipe-arrow{color:var(--text3);font-size:14px;padding:0 5px}
+.pipe-step.active{background:var(--tgt-bg);border-color:var(--tgt-bd);color:var(--tgt)}
+
+/* Run length note */
+.note-box{background:var(--dec-bg);border:1px solid var(--dec-bd);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--dec);margin-bottom:16px}
+.note-box strong{color:var(--dec)}
+
+.footer{margin-top:20px;font-size:10px;color:var(--text3);text-align:center;padding-top:10px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <h1><span class="en-text">Time Series Analysis Structure</span><span class="ru-text">Структура анализа временных рядов</span></h1>
+    <div class="subtitle"><span class="en-text">Olefins Delta-Delta Project · Indorama Eleme · 7 furnaces 1HA–1HG</span><span class="ru-text">Проект Delta-Delta · Indorama Eleme · 7 печей 1HA–1HG</span></div>
+  </div>
+  <button class="lang-btn" onclick="toggleLang()">RU / EN</button>
+</div>
+
+<!-- Step 1: Scope -->
+<div class="section-title"><span class="en-text">Step 1 — Data scope</span><span class="ru-text">Шаг 1 — Объём данных</span></div>
+<div class="scope-grid">
+  <div class="scope-card">
+    <div class="scope-num">7</div>
+    <div class="scope-label"><span class="en-text">Furnaces</span><span class="ru-text">Печей</span></div>
+    <div class="scope-sub">1HA · 1HB · 1HC · 1HD · 1HE · 1HF · 1HG</div>
+  </div>
+  <div class="scope-card">
+    <div class="scope-num">4</div>
+    <div class="scope-label"><span class="en-text">Passes per furnace</span><span class="ru-text">Пасса на печь</span></div>
+    <div class="scope-sub">A · B · C · D — independent feed + steam control</div>
+  </div>
+  <div class="scope-card">
+    <div class="scope-num">~16</div>
+    <div class="scope-label"><span class="en-text">Cycles per furnace</span><span class="ru-text">Циклов на печь</span></div>
+    <div class="scope-sub"><span class="en-text">Feb 2025 → Mar 2026 · dense TC data (192 tubes)</span><span class="ru-text">Фев 2025 → Мар 2026 · плотные TC (192 трубки)</span></div>
+  </div>
+</div>
+
+<!-- Step 2: Hierarchy -->
+<div class="section-title"><span class="en-text">Step 2 — Analysis hierarchy</span><span class="ru-text">Шаг 2 — Иерархия анализа</span></div>
+<div class="tree">
+  <div class="tree-row">
+    <span class="tree-icon">🏭</span>
+    <div><span class="tree-label"><span class="en-text">Fleet (7 furnaces)</span><span class="ru-text">Флот (7 печей)</span></span><span class="tree-sub"><span class="en-text">— aggregate after all furnaces done · notebook_00</span><span class="ru-text">— агрегация после всех печей · notebook_00</span></span></div>
+  </div>
+  <div class="tree-line"></div>
+  <div class="tree-row ti1">
+    <span class="tree-icon">🔥</span>
+    <div><span class="tree-label"><span class="en-text">Furnace (e.g. 1HA)</span><span class="ru-text">Печь (напр. 1HA)</span></span><span class="tree-sub"><span class="en-text">— one analysis per furnace, parametrized by FURNACE variable</span><span class="ru-text">— один анализ на печь, параметр FURNACE</span></span></div>
+  </div>
+  <div class="tree-line" style="margin-left:49px"></div>
+  <div class="tree-row ti2">
+    <span class="tree-icon">🔄</span>
+    <div><span class="tree-label"><span class="en-text">Cracking cycle (median ~22 days, range 5–31 d)</span><span class="ru-text">Цикл крекинга (медиана ~22 дня, диапазон 5–31 дн)</span></span><span class="tree-sub"><span class="en-text">— decoke → decoke · NOT fixed 25 days</span><span class="ru-text">— декокс → декокс · НЕ фиксированные 25 дней</span></span></div>
+  </div>
+  <div class="tree-line" style="margin-left:69px"></div>
+  <div class="tree-row ti3">
+    <span class="tree-icon">✅</span>
+    <div><span class="tree-label"><span class="en-text">Clean window (typically 17–21 days)</span><span class="ru-text">Чистое окно (обычно 17–21 день)</span></span><span class="tree-sub"><span class="en-text">— after warmup cut, before tail cut · this is what we analyse</span><span class="ru-text">— после обрезки прогрева и хвоста · именно это анализируем</span></span></div>
+  </div>
+  <div class="tree-line" style="margin-left:69px"></div>
+  <div class="tree-row ti3">
+    <span class="tree-icon">🔀</span>
+    <div><span class="tree-label"><span class="en-text">Pass A / B / C / D (48 tubes each)</span><span class="ru-text">Пасс A / B / C / D (48 трубок каждый)</span></span><span class="tree-sub"><span class="en-text">— analysed together (dd_abs_max) AND separately (dd_abs_max_A/B/C/D)</span><span class="ru-text">— вместе (dd_abs_max) И по отдельности (dd_abs_max_A/B/C/D)</span></span></div>
+  </div>
+</div>
+
+<!-- Important note -->
+<div class="note-box">
+  ⚠ <strong><span class="en-text">Run lengths are NOT fixed 25 days.</span><span class="ru-text">Длина прогонов НЕ фиксированные 25 дней.</span></strong>
+  <span class="en-text">Fleet median ~22 d, range 5–31 d. Each cycle is detected individually from the feed drop. Never assume fixed duration.</span>
+  <span class="ru-text">Медиана по флоту ~22 дня, диапазон 5–31 дней. Каждый цикл определяется индивидуально по падению подачи. Никогда не предполагай фиксированную длину.</span>
+</div>
+
+<!-- Step 3: What to cut -->
+<div class="section-title"><span class="en-text">Step 3 — What to cut from each cycle</span><span class="ru-text">Шаг 3 — Что вырезать из каждого цикла</span></div>
+<div class="tl-wrap">
+  <div class="tl-bar">
+    <div class="tl-seg unknown" style="flex:1"><span class="en-text">Before</span><span class="ru-text">До</span></div>
+    <div class="tl-seg decoke" style="flex:1"><span class="en-text">DECOKE</span><span class="ru-text">ДЕКОКС</span></div>
+    <div class="tl-seg cut" style="flex:1.5"><span class="en-text">Warm-up</span><span class="ru-text">Прогрев</span></div>
+    <div class="tl-seg clean" style="flex:7"><span class="en-text">✓ CLEAN WINDOW — analyse this</span><span class="ru-text">✓ ЧИСТОЕ ОКНО — анализируем это</span></div>
+    <div class="tl-seg cut" style="flex:1.5"><span class="en-text">Tail</span><span class="ru-text">Хвост</span></div>
+    <div class="tl-seg decoke" style="flex:1"><span class="en-text">DECOKE</span><span class="ru-text">ДЕКОКС</span></div>
+    <div class="tl-seg unknown" style="flex:1"><span class="en-text">After</span><span class="ru-text">После</span></div>
+  </div>
+  <div class="tl-legend">
+    <div class="tl-li"><div class="tl-dot" style="background:var(--lev-bg);border:1px solid var(--lev-bd)"></div><span class="en-text">Cut — incomplete cycle (no known start or end)</span><span class="ru-text">Убрать — неполный цикл (нет начала или конца)</span></div>
+    <div class="tl-li"><div class="tl-dot" style="background:var(--bg3);border:1px solid var(--border2)"></div><span class="en-text">Cut — decoke (feed = 0, past process, coke burned off)</span><span class="ru-text">Убрать — декокс (подача = 0, прошлый процесс)</span></div>
+    <div class="tl-li"><div class="tl-dot" style="background:var(--red-bg);border:1px solid var(--red-bd)"></div><span class="en-text">Cut — warm-up (feed stepping up, COT unstable) + tail (feed winding down)</span><span class="ru-text">Убрать — прогрев (подача поднимается, COT нестабилен) + хвост (подача снижается)</span></div>
+    <div class="tl-li"><div class="tl-dot" style="background:var(--tgt-bg);border:1px solid var(--tgt-bd)"></div><span class="en-text">Keep — stable cracking only. ΔΔ baseline set. Feed constant. COT settled.</span><span class="ru-text">Оставить — только стабильный крекинг. Базовая линия ΔΔ задана. Подача постоянна. COT устоялся.</span></div>
+  </div>
+</div>
+
+<!-- Step 4: Criteria -->
+<div class="section-title"><span class="en-text">Step 4 — Three criteria for warm-up end (analysis_start)</span><span class="ru-text">Шаг 4 — Три критерия окончания прогрева (analysis_start)</span></div>
+<div class="criteria">
+  <div class="crit-card">
+    <div class="crit-num">1</div>
+    <div class="crit-title"><span class="en-text">Feed at operating level</span><span class="ru-text">Подача на рабочем уровне</span></div>
+    <div class="crit-body"><span class="crit-code">feed_total &gt; 95%</span> <span class="en-text">of run median. All passes online and stable.</span><span class="ru-text"> медианы прогона. Все пассы включены и стабильны.</span></div>
+  </div>
+  <div class="crit-card">
+    <div class="crit-num">2</div>
+    <div class="crit-title"><span class="en-text">COT settled</span><span class="ru-text">COT устоялся</span></div>
+    <div class="crit-body"><span class="en-text">Rolling std(COT) &lt; </span><span class="ru-text">Скользящее std(COT) &lt; </span><span class="crit-code">2°C / 4h</span><span class="en-text">. Temperature no longer stepping.</span><span class="ru-text">. Температура перестала скакать.</span></div>
+  </div>
+  <div class="crit-card">
+    <div class="crit-num">3</div>
+    <div class="crit-title"><span class="en-text">Minimum time elapsed</span><span class="ru-text">Минимальное время истекло</span></div>
+    <div class="crit-body"><span class="crit-code">t ≥ run.start + 12h</span><span class="en-text">. Always skip the ΔΔ baseline snapshot window.</span><span class="ru-text">. Всегда пропускать окно базовой линии ΔΔ.</span></div>
+  </div>
+</div>
+
+<!-- Step 5: What we analyse -->
+<div class="section-title"><span class="en-text">Step 5 — What we analyse in the clean window</span><span class="ru-text">Шаг 5 — Что анализируем в чистом окне</span></div>
+<div class="analysis-grid">
+  <div class="a-card">
+    <div class="a-title">🎯 <span class="en-text">Target signal</span><span class="ru-text">Целевой сигнал</span></div>
+    <div class="a-row"><span><code>dd_abs_max</code> — <span class="en-text">max tube Delta-Delta (°C). Grows 0 → 45°C over the run.</span><span class="ru-text">макс. Delta-Delta трубки (°C). Растёт 0 → 45°C за прогон.</span></span></div>
+    <div class="a-row"><span><span class="en-text">Per-pass:</span><span class="ru-text">По пассам:</span> <code>dd_abs_max_A/B/C/D</code></span></div>
+    <div class="a-row"><span><span class="en-text">Pre-alarm: 30°C · Alarm: 45°C · Decoke trigger: 45–50°C</span><span class="ru-text">Предупреждение: 30°C · Тревога: 45°C · Декокс: 45–50°C</span></span></div>
+  </div>
+  <div class="a-card">
+    <div class="a-title">⚙️ <span class="en-text">Driver variables</span><span class="ru-text">Переменные-драйверы</span></div>
+    <div class="a-row"><span><code>cot</code> — <span class="en-text">cracking temperature (+)</span><span class="ru-text">температура крекинга (+)</span></span></div>
+    <div class="a-row"><span><code>steam_hc</code> — <span class="en-text">dilution steam ratio (−)</span><span class="ru-text">пар/углеводороды (−)</span></span></div>
+    <div class="a-row"><span><code>feed_C5p</code> — <span class="en-text">heavy NGL fraction (+)</span><span class="ru-text">тяжёлая фракция (+)</span></span></div>
+    <div class="a-row"><span><code>run_age_days</code> — <span class="en-text">time in run (+)</span><span class="ru-text">возраст прогона (+)</span></span></div>
+  </div>
+  <div class="a-card">
+    <div class="a-title">📊 <span class="en-text">Analysis type 1 — Correlations</span><span class="ru-text">Анализ 1 — Корреляции</span></div>
+    <div class="a-row"><span class="en-text">Spearman ρ (driver vs dd_abs_max) over clean window</span><span class="ru-text">Spearman ρ (драйвер vs dd_abs_max) по чистому окну</span></div>
+    <div class="a-row"><span class="en-text">Phase-binned (5-day windows) → causal vs operator feedback</span><span class="ru-text">По 5-дневным фазам → причина vs обратная связь оператора</span></div>
+  </div>
+  <div class="a-card">
+    <div class="a-title">📈 <span class="en-text">Analysis type 2 — Forecaster</span><span class="ru-text">Анализ 2 — Прогноз</span></div>
+    <div class="a-row"><span class="en-text">Delta-Delta trajectory conditioned on run_age + levers</span><span class="ru-text">Траектория Delta-Delta в зависимости от run_age + рычаги</span></div>
+    <div class="a-row"><span class="en-text">Long history (2019→): ~104 cycles × 7 furnaces = ~700 runs</span><span class="ru-text">Длинная история (2019→): ~104 цикла × 7 печей = ~700 прогонов</span></div>
+  </div>
+</div>
+
+<!-- Step 6: Pipeline -->
+<div class="section-title"><span class="en-text">Step 6 — Notebook pipeline</span><span class="ru-text">Шаг 6 — Очерёдность ноутбуков</span></div>
+<div class="pipeline">
+  <div class="pipe-step active">
+    <div class="ps-num">00b</div>
+    <span class="en-text">Clean extraction</span><span class="ru-text">Чистая выгрузка</span>
+  </div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step">
+    <div class="ps-num">01</div>
+    <span class="en-text">Tag inspection</span><span class="ru-text">Проверка тегов</span>
+  </div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step">
+    <div class="ps-num">02</div>
+    <span class="en-text">Correlations</span><span class="ru-text">Корреляции</span>
+  </div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step">
+    <div class="ps-num">03</div>
+    <span class="en-text">Forecaster</span><span class="ru-text">Прогноз</span>
+  </div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-step">
+    <div class="ps-num">00</div>
+    <span class="en-text">Fleet summary</span><span class="ru-text">Сводка флота</span>
+  </div>
+</div>
+<p style="font-size:10px;color:var(--text3);margin-top:5px">
+  <span class="en-text">← Start here. notebook_00b runs once per furnace and outputs <code>output/{FURNACE}_clean.parquet</code> which all downstream notebooks read from.</span>
+  <span class="ru-text">← Начать здесь. notebook_00b запускается на каждую печь и сохраняет <code>output/{FURNACE}_clean.parquet</code> — все следующие ноутбуки читают из этого файла.</span>
+</p>
+
+<div class="footer">
+  <span class="en-text">olefins_ddf project · Indorama Eleme · Source: docs/methodology.md · CLAUDE.md</span>
+  <span class="ru-text">Проект olefins_ddf · Indorama Eleme · Источник: docs/methodology.md · CLAUDE.md</span>
+</div>
+
+<script>
+let lang='en';
+function toggleLang(){
+  lang=lang==='en'?'ru':'en';
+  document.querySelectorAll('.en-text').forEach(el=>el.style.display=lang==='en'?'':'none');
+  document.querySelectorAll('.ru-text').forEach(el=>el.style.display=lang==='ru'?'':'none');
+  document.querySelector('.lang-btn').textContent=lang==='en'?'RU / EN':'EN / RU';
+}
+document.querySelectorAll('.ru-text').forEach(el=>el.style.display='none');
+</script>
+</body>
+</html>

@@ -53,6 +53,92 @@ margin. Source docs in `context/`.
 
 ## Log
 
+### 2026-06-22 — Notebook 02 binned correlations by 5-day run phase (1HA)
+
+**Notebook created:** `notebook_02_binned_correlations.ipynb`
+
+**Method — Harry's phase-bin approach:**
+Split each run's clean analysis window (from `output/run_analysis_windows.csv`) into consecutive
+5-day phase bins. For each bin, compute Spearman rank correlation between every driver and
+`dd_abs_max`. Compare trajectories across bins to separate causal from feedback effects.
+
+**Rationale:** Whole-run correlations mix two signals: (1) physics — the causal effect of
+operating conditions on coking rate; (2) operator feedback — corrective actions taken *because*
+coking is worsening. Early bins (days 0–5, 5–10) capture the causal signal; late bins (15+)
+are increasingly dominated by feedback. A driver with stable correlation across phases is causal;
+one that strengthens or reverses sign in later phases is partly or wholly a feedback artefact.
+
+**`coil_out_P` excluded throughout** (frozen sensor, see 2026-06-22 tag inspection entry).
+**`eff_*` excluded** (unreliable GC). **`dd_p95`, `delta_spread`, `coking_rate`** excluded (collinear with target).
+
+**Expected causal pattern (to verify against actual results):**
+- `cot` → positive early (severity drives coking), may weaken/reverse late (operators back off)
+- `steam_hc` → negative early (more dilution = less coking), likely reinforces late (operators add steam when DeltaDelta rises)
+- `feed_C5p` → positive and stable across all phases (heavier NGL always cokes more; operators cannot change feed composition)
+- `run_age_days` → positive throughout (monotonic accumulation); stable within each 5-day window
+- `steam_hc_spread` → positive if pass imbalance causes localised coking (pass with least steam cokes first)
+
+**Classification rules (automated, see notebook cell 8):**
+- `causal` — |ρ₀| ≥ 0.10, significant (p<0.05), same sign in phases 0 & 1
+- `feedback_reinforcement` — |ρ_late| > |ρ_early| + 0.10, same sign
+- `spurious_reversal` — sign flips between early and later phases
+- `weak` — |ρ| < 0.10 in all phases
+
+**Output files (fill in after running):**
+- `output/1HA_02_binned_correlations.csv` — tidy table: phase_bin × driver × rho/pval/n
+- `output/1HA_02_driver_classification.csv` — one row per driver with causal/feedback class
+- `output/1HA_02_corr_heatmap.png` — main visualization (driver × phase, colored by ρ)
+- `output/1HA_02_corr_trajectory_primary.png` — ρ trajectory for key levers (COT, steam/HC, feed, C5+)
+- `output/1HA_02_corr_per_pass_steam_hc.png` — per-pass steam/HC trajectories
+- `output/1HA_02_driver_classification.png` — colour-coded classification strip
+
+**Actual results (fill in after running the notebook):**
+- _(copy from notebook Cell 9 printed output)_
+
+**Implication for notebook_03:** The `causal` driver set from this analysis becomes the clean
+feature input for the Delta-Delta forecaster / run-level regression in notebook_03.
+
+---
+
+### 2026-06-22 — Notebook 01 tag inspection + analysis window detection (1HA)
+
+**Notebooks created:**
+- `notebook_01_tag_inspection.ipynb` — tag health check + run boundary analysis for one furnace.
+  Run per-furnace (change `FURNACE` in cell 2), uses `.venv` kernel in VS Code. Parametrised with
+  `parameters` tag for papermill batch runs (`bash run_all_furnaces.sh`).
+- `notebook_00_fleet_summary.ipynb` — fleet aggregation; run after all 7 furnaces complete.
+
+**Run windows — 1HA (16 runs, Feb 2025 – Mar 2026):**
+- Typical clean window: 17–21 days after warmup/tail trimming. All 16 settled automatically.
+- Warmup criteria: feed_total > 95% run median AND rolling std(COT) < 2 °C / 4 h AND t ≥ run.start + 12 h.
+- End criterion: last timestamp where feed_total > 95% run median.
+- **Suspicious runs requiring DCS verification:**
+  - Run 2 (Apr 28–May 17): warmup = 147 h — slow/interrupted startup, check DCS Apr 28–May 4 2025
+  - Run 4 (Jun 8–Jun 29): warmup = 145 h — same pattern, check DCS Jun 8–14 2025
+  - Run 8 (Sep 8–Oct 2): tail = 45.5 h — 2-day feed reduction before decoke
+  - Run 11 (Nov 19–Dec 12): tail = 195 h — major event, likely partial shutdown Nov 20–Dec 4 2025
+  - Run 12 (Dec 13–Jan 1): warmup = 41.5 h — slow restart after Run 11 event
+- Output: `output/run_analysis_windows.csv` — shared input for all subsequent notebooks.
+
+**Tag health — 1HA (222 tags inspected):**
+- **`coil_out_P` (01PI1404, 01PI1401): EXCLUDE from all analysis.** Both sensors flat 93% of
+  the time (vmin=0, vmax≈1.9 kg/cm², mean≈0.6). Frozen or offline. Do not use in correlations.
+- **2 tube TCs with negative vmin:** `01TI1131A.PV` (−59 °C) and `01TI1157A.PV` (−55 °C).
+  Offline-period artefacts. Already dropped by `compute_delta()` (< ONLINE_TEMP_C = 500 °C).
+  No code change needed; document for awareness.
+- **feed_flow Pass A (01FC0205): 45 gaps** vs 20–21 for passes B/C/D. More data outages on
+  Pass A. Monitor when computing feed_total sums.
+- All other 218 tags: no systematic zeros, no spikes, no flat lines. Data quality good.
+
+**Spike filter (dd_abs_max):**
+- Threshold: > 60 °C AND duration < 3 h → NaN (not deleted). Physical basis: coking builds
+  over days, cannot jump 60 °C and recover in a single 30-min bucket.
+- **6 transient spikes removed** (Jul, Sep, Nov 2025, Jan 2026) — confirmed single-reading faults.
+- **1 spike kept** (~120 °C, Oct/Nov 2025, Run 9) — lasted > 3 h. Needs manual DCS check:
+  real coking peak vs sustained TC fault.
+- Harry's "don't overclean" principle respected: filter targets physically impossible events only;
+  real high-DD periods (lasting days) pass through untouched.
+
 ### 2026-06-15 — Pass topology decoded & threaded through the toolkit
 - **Topology confirmed: furnace → 4 passes (#A–#D) → bank of parallel tubes.**
   Each pass is independently feed- and dilution-steam-controlled; tubes (each with

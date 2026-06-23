@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tag Map — Olefins Delta-Delta Project</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f7f6f3;--bg3:#eeedea;
+  --text:#1a1a18;--text2:#5a5a56;--text3:#8a8a84;
+  --border:rgba(0,0,0,0.10);--border2:rgba(0,0,0,0.18);
+  --tgt:#085041;--tgt-bg:#e1f5ee;--tgt-bd:#1d9e75;
+  --lev:#3c3489;--lev-bg:#eeedfe;--lev-bd:#7f77dd;
+  --feed:#633806;--feed-bg:#faeeda;--feed-bd:#ef9f27;
+  --dec:#993c1d;--dec-bg:#faece7;--dec-bd:#d85a30;
+  --yld:#185fa5;--yld-bg:#e6f1fb;--yld-bd:#378add;
+  --red:#a32d2d;--red-bg:#fcebeb;--red-bd:#e24b4a;
+  --neu:#3a3a38;--neu-bg:#f0efec;--neu-bd:#c8c8c0;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#1a1a18;--bg2:#242422;--bg3:#2e2e2c;--text:#f0efe8;--text2:#a8a8a0;--text3:#686860;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);--tgt:#5dcaa5;--tgt-bg:#04342c;--tgt-bd:#1d9e75;--lev:#afa9ec;--lev-bg:#26215c;--lev-bd:#7f77dd;--feed:#fac775;--feed-bg:#412402;--feed-bd:#ef9f27;--dec:#f0997b;--dec-bg:#4a1b0c;--dec-bd:#d85a30;--red:#f7c1c1;--red-bg:#501313;--red-bd:#e24b4a;--yld:#7ab9f0;--yld-bg:#0c2a4a;--yld-bd:#378add;--neu:#c8c8c0;--neu-bg:#2a2a28;--neu-bd:#4a4a46;}
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);padding:20px;font-size:12px;max-width:960px;margin:0 auto}
+h1{font-size:18px;font-weight:700;margin-bottom:4px}
+.subtitle{font-size:12px;color:var(--text3);margin-bottom:16px}
+
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.lang-btn{font-size:11px;padding:4px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:inherit}
+
+.order-strip{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:14px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px}
+.order-chip{font-size:10px;font-weight:600;padding:3px 9px;border-radius:12px;white-space:nowrap}
+.ord-arrow{color:var(--text3);font-size:13px}
+
+.group{border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.group-header{display:flex;align-items:center;gap:8px;padding:9px 14px;cursor:pointer;user-select:none}
+.gh-icon{font-size:16px}
+.gh-title{font-size:13px;font-weight:600;flex:1}
+.gh-count{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.gh-priority{font-size:10px;color:var(--text3);margin-left:auto;margin-right:10px}
+.gh-toggle{font-size:11px;color:var(--text3)}
+.group-body{border-top:1px solid var(--border)}
+
+.col-header{display:grid;grid-template-columns:150px 90px 1fr 1fr;gap:8px;padding:5px 14px;background:var(--bg3);border-bottom:1px solid var(--border)}
+.col-header span{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.tag-row{display:grid;grid-template-columns:150px 90px 1fr 1fr;gap:8px;align-items:start;padding:8px 14px;border-bottom:1px solid var(--border)}
+.tag-row:last-child{border-bottom:none}
+.tag-row:hover{background:var(--bg2)}
+.tag-code{font-family:'SF Mono',monospace;font-size:10px;font-weight:600;color:var(--text)}
+.tag-uom{font-size:10px;color:var(--text3);margin-top:2px}
+.tag-what{font-size:11px;color:var(--text);line-height:1.5}
+.tag-why{font-size:11px;color:var(--text2);line-height:1.5}
+.warn{display:inline-block;font-size:9px;font-weight:600;padding:1px 7px;border-radius:8px;margin-top:4px}
+.warn-r{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+.warn-y{background:var(--feed-bg);color:var(--feed);border:1px solid var(--feed-bd)}
+.warn-g{background:var(--tgt-bg);color:var(--tgt);border:1px solid var(--tgt-bd)}
+
+.future-col{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border)}
+.future-col:last-child{border-bottom:none}
+.future-col:hover{background:var(--bg2)}
+
+.section-note{font-size:10px;color:var(--text3);padding:6px 14px;background:var(--bg2);border-top:1px solid var(--border);font-style:italic}
+.footer{margin-top:20px;font-size:10px;color:var(--text3);text-align:center;padding-top:10px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <h1>Tag Map — Olefins Delta-Delta</h1>
+    <div class="subtitle">
+      <span class="en-text">What each tag is needed for and why · Indorama Eleme · 7 furnaces 1HA–1HG</span>
+      <span class="ru-text">Зачем каждый тег и почему · Indorama Eleme · 7 печей 1HA–1HG</span>
+    </div>
+  </div>
+  <button class="lang-btn" onclick="toggleLang()">RU / EN</button>
+</div>
+
+<!-- Priority order -->
+<div class="order-strip">
+  <span style="font-size:10px;font-weight:600;color:var(--text2)"><span class="en-text">Analysis order:</span><span class="ru-text">Порядок анализа:</span></span>
+  <span class="order-chip" style="background:var(--dec-bg);color:var(--dec);border:1px solid var(--dec-bd)"><span class="en-text">1. Cycle detection</span><span class="ru-text">1. Детекция цикла</span></span>
+  <span class="ord-arrow">→</span>
+  <span class="order-chip" style="background:var(--tgt-bg);color:var(--tgt);border:1px solid var(--tgt-bd)"><span class="en-text">2. Delta-Delta target</span><span class="ru-text">2. Delta-Delta (цель)</span></span>
+  <span class="ord-arrow">→</span>
+  <span class="order-chip" style="background:var(--lev-bg);color:var(--lev);border:1px solid var(--lev-bd)"><span class="en-text">3. Operating levers</span><span class="ru-text">3. Рычаги управления</span></span>
+  <span class="ord-arrow">→</span>
+  <span class="order-chip" style="background:var(--feed-bg);color:var(--feed);border:1px solid var(--feed-bd)"><span class="en-text">4. Feed quality GC</span><span class="ru-text">4. Состав сырья GC</span></span>
+  <span class="ord-arrow">→</span>
+  <span class="order-chip" style="background:var(--yld-bg);color:var(--yld);border:1px solid var(--yld-bd)"><span class="en-text">5. Yield (caution)</span><span class="ru-text">5. Выход (осторожно)</span></span>
+  <span class="ord-arrow">→</span>
+  <span class="order-chip" style="background:var(--neu-bg);color:var(--neu);border:1px solid var(--neu-bd)"><span class="en-text">6. Future: confounders</span><span class="ru-text">6. Будущее: конфаундеры</span></span>
+</div>
+
+<!-- GROUP 1 -->
+<div class="group" style="border-color:var(--dec-bd)">
+  <div class="group-header" style="background:var(--dec-bg)" onclick="toggle('g1')">
+    <span class="gh-icon">🔄</span>
+    <span class="gh-title" style="color:var(--dec)"><span class="en-text">Group 1 — Cycle &amp; decoke detection</span><span class="ru-text">Группа 1 — Детекция цикла и декокса</span></span>
+    <span class="gh-count" style="background:var(--dec-bg);color:var(--dec);border:1px solid var(--dec-bd)"><span class="en-text">5 tags × 7 furnaces</span><span class="ru-text">5 тегов × 7 печей</span></span>
+    <span class="gh-priority"><span class="en-text">Priority 1 — must have before anything else</span><span class="ru-text">Приоритет 1 — нужно до всего остального</span></span>
+    <span class="gh-toggle" id="t1">▾</span>
+  </div>
+  <div class="group-body" id="g1">
+    <div class="col-header">
+      <span><span class="en-text">Tag / role</span><span class="ru-text">Тег / роль</span></span>
+      <span>UoM / <span class="en-text">history</span><span class="ru-text">история</span></span>
+      <span><span class="en-text">What it measures</span><span class="ru-text">Что измеряет</span></span>
+      <span><span class="en-text">Why needed</span><span class="ru-text">Зачем нужен</span></span>
+    </div>
+    <div class="tag-row">
+      <div><div class="tag-code">01FC0205/07/09/11.PV</div><div class="tag-uom"><span class="en-text">feed_flow (Pass A–D)</span><span class="ru-text">подача (Пасс A–D)</span></div></div>
+      <div><div class="tag-code">NM³/H</div><div class="tag-uom">2019→</div></div>
+      <div class="tag-what"><span class="en-text">HC feed per pass into the furnace</span><span class="ru-text">Подача углеводородов на каждый пасс</span></div>
+      <div class="tag-why"><span class="en-text"><strong>PRIMARY decoke detector.</strong> Feed drops to ~0 during decoke (not temperature). Defines run start/end. Also throughput lever for correlation.</span><span class="ru-text"><strong>ГЛАВНЫЙ детектор декокса.</strong> Подача падает до ~0 при декоксовании (не температура). Определяет начало/конец прогона.</span>
+        <div><span class="warn warn-y"><span class="en-text">⚠ Pass A (01FC0205): more data gaps — monitor</span><span class="ru-text">⚠ Пасс A: больше пропусков — следить</span></span></div>
+      </div>
+    </div>
+    <div class="tag-row">
+      <div><div class="tag-code">01FC0433–0436.PV</div><div class="tag-uom"><span class="en-text">decoke_air (Pass A–D)</span><span class="ru-text">декокс-воздух (A–D)</span></div></div>
+      <div><div class="tag-code">NM³/H</div><div class="tag-uom">2019→</div></div>
+      <div class="tag-what"><span class="en-text">Air flow during per-pass decoking</span><span class="ru-text">Поток воздуха при декоксовании пасса</span></div>
+      <div class="tag-why"><span class="en-text"><strong>Independent decoke confirmation.</strong> Shows which pass is being decoked. Second check alongside feed drop.</span><span class="ru-text"><strong>Независимое подтверждение декокса.</strong> Показывает какой пасс декоксуется.</span></div>
+    </div>
+  </div>
+  <div class="section-note"><span class="en-text">Rule: cracking mask = feed_total &gt; 30% of running level AND tube COTs &gt; 500°C. A decoke does NOT cool the furnace.</span><span class="ru-text">Правило: маска крекинга = feed_total &gt; 30% рабочего уровня И трубки &gt; 500°C. Декокс НЕ охлаждает печь.</span></div>
+</div>
+
+<!-- GROUP 2 -->
+<div class="group" style="border-color:var(--tgt-bd)">
+  <div class="group-header" style="background:var(--tgt-bg)" onclick="toggle('g2')">
+    <span class="gh-icon">🎯</span>
+    <span class="gh-title" style="color:var(--tgt)"><span class="en-text">Group 2 — Delta-Delta target signal</span><span class="ru-text">Группа 2 — Целевой сигнал Delta-Delta</span></span>
+    <span class="gh-count" style="background:var(--tgt-bg);color:var(--tgt);border:1px solid var(--tgt-bd)"><span class="en-text">192 + 8 tubes × 7 furnaces</span><span class="ru-text">192 + 8 трубок × 7 печей</span></span>
+    <span class="gh-priority"><span class="en-text">Priority 2 — the KPI we forecast</span><span class="ru-text">Приоритет 2 — KPI который прогнозируем</span></span>
+    <span class="gh-toggle" id="t2">▾</span>
+  </div>
+  <div class="group-body" id="g2">
+    <div class="col-header">
+      <span><span class="en-text">Tag / role</span><span class="ru-text">Тег / роль</span></span>
+      <span>UoM / <span class="en-text">history</span><span class="ru-text">история</span></span>
+      <span><span class="en-text">What it measures</span><span class="ru-text">Что измеряет</span></span>
+      <span><span class="en-text">Why needed</span><span class="ru-text">Зачем нужен</span></span>
+    </div>
+    <div class="tag-row">
+      <div><div class="tag-code">01TI{F}{001–192}A.PV</div><div class="tag-uom"><span class="en-text">tube_COT (dense)</span><span class="ru-text">трубочные TC (плотные)</span></div></div>
+      <div><div class="tag-code">°C</div><div class="tag-uom"><strong>2025-02→</strong></div></div>
+      <div class="tag-what"><span class="en-text">Per-tube coil-outlet skin temperature. 192 tubes/furnace, 48/pass, ~1/min. All 1344 in historian (127 named, 1217 blank — key on ID, not description).</span><span class="ru-text">Температура поверхности трубки. 192 трубки/печь, 48/пасс, ~1/мин. Все 1344 в историке. Ключ — ID, не описание.</span></div>
+      <div class="tag-why"><span class="en-text"><strong>Delta-Delta source.</strong> DeltaDelta_i = (COT_i − pass_mean) − baseline. dd_abs_max = worst tube. Alarm at 45°C → decoke decision.</span><span class="ru-text"><strong>Источник Delta-Delta.</strong> DeltaDelta_i = (COT_i − среднее пасса) − базовая линия. dd_abs_max = худшая трубка. Тревога при 45°C.</span>
+        <div><span class="warn warn-g"><span class="en-text">Pass map: tube 1–48→A, 49–96→B, 97–144→C, 145–192→D</span><span class="ru-text">Карта: 1–48→A, 49–96→B, 97–144→C, 145–192→D</span></span></div>
+      </div>
+    </div>
+    <div class="tag-row">
+      <div><div class="tag-code">01TI08xx.PV (PQE#5/#8)</div><div class="tag-uom"><span class="en-text">tube_COT_long</span><span class="ru-text">длинная история</span></div></div>
+      <div><div class="tag-code">°C</div><div class="tag-uom"><strong>2019→</strong></div></div>
+      <div class="tag-what"><span class="en-text">8-tube proxy per furnace (2/pass at positions 5 &amp; 8). BANK description. Furnace inferred from number block.</span><span class="ru-text">Прокси 8 трубок/печь (2/пасс позиции 5 и 8). Печь из числового блока.</span></div>
+      <div class="tag-why"><span class="en-text"><strong>Long history only.</strong> ~104 cycles/furnace back to 2019 (~700 cycles fleet-wide). Use for forecaster training; validate against dense TCs on overlap window (2025-02→).</span><span class="ru-text"><strong>Только длинная история.</strong> ~104 цикла/печь с 2019 г. (~700 циклов по флоту). Для обучения форсайтера.</span></div>
+    </div>
+  </div>
+  <div class="section-note"><span class="en-text">Note: Value=0 means TC offline (not 0°C). Dropped by compute_delta (&lt;500°C mask). Duplex TCs on tubes 12 &amp; 25 excluded.</span><span class="ru-text">Примечание: Value=0 = TC offline (не 0°C). Исключается в compute_delta. Дублирующие TC на трубках 12 и 25 тоже исключены.</span></div>
+</div>
+
+<!-- GROUP 3 -->
+<div class="group" style="border-color:var(--lev-bd)">
+  <div class="group-header" style="background:var(--lev-bg)" onclick="toggle('g3')">
+    <span class="gh-icon">⚙️</span>
+    <span class="gh-title" style="color:var(--lev)"><span class="en-text">Group 3 — Operating levers (causal drivers)</span><span class="ru-text">Группа 3 — Рычаги управления (причинные факторы)</span></span>
+    <span class="gh-count" style="background:var(--lev-bg);color:var(--lev);border:1px solid var(--lev-bd)"><span class="en-text">~18 tags per furnace</span><span class="ru-text">~18 тегов на печь</span></span>
+    <span class="gh-priority"><span class="en-text">Priority 3 — explains WHY coking happens</span><span class="ru-text">Приоритет 3 — объясняет ПОЧЕМУ коксование</span></span>
+    <span class="gh-toggle" id="t3">▾</span>
+  </div>
+  <div class="group-body" id="g3">
+    <div class="col-header">
+      <span><span class="en-text">Tag / role</span><span class="ru-text">Тег / роль</span></span>
+      <span>UoM</span>
+      <span><span class="en-text">What it measures</span><span class="ru-text">Что измеряет</span></span>
+      <span><span class="en-text">Why needed + expected sign vs ΔΔ</span><span class="ru-text">Зачем + ожидаемый знак vs ΔΔ</span></span>
+    </div>
+    <div class="tag-row">
+      <div><div class="tag-code">01TC0805.PV</div><div class="tag-uom">cot_ctrl · 2019→</div></div>
+      <div><div class="tag-code">°C</div></div>
+      <div class="tag-what"><span class="en-text">Controlled coil-outlet temperature setpoint (1/furnace)</span><span class="ru-text">Уставка температуры выхода змеевика (1/печь)</span></div>
+      <div class="tag-why"><span class="en-text"><strong>Severity lever (+).</strong> Higher COT → more cracking → faster coking. Leads dd_abs_max by 17–23 h. Watch for operator feedback: COT backed off when ΔΔ rises.</span><span class="ru-text"><strong>Рычаг жёсткости (+).</strong> Выше COT → больше крекинг → быстрее коксование. Опережает dd_abs_max на 17–23 ч.</span></div>
+    </div>
+    <div class="tag-row">
+      <div><div class="tag-code">01FC0217/20/23/26.PV</div><div class="tag-uom">dil_steam A–D · 2019→</div></div>
+      <div><div class="tag-code">KG/H</div></div>
+      <div class="tag-what"><span class="en-text">Dilution steam per pass (4/furnace). Combined: steam_hc = total_steam / total_feed.</span><span class="ru-text">Пар разбавления на каждый пасс. Суммарно: steam_hc = пар/углеводороды.</span></div>
+      <div class="tag-why"><span class="en-text"><strong>Dilution lever (−).</strong> More steam → less coking. BUT: operators add steam when ΔΔ rises → confounder in late-run bins. Use run-start windows to isolate causal effect.</span><span class="ru-text"><strong>Рычаг разбавления (−).</strong> Больше пара → меньше коксование. НО: операторы добавляют пар при росте ΔΔ → конфаундер.</span></div>
+    </div>
+    <div class="tag-row">
+      <div><div class="tag-code">01PI1401/1404.PV</div><div class="tag-uom">coil_out_P · 2019→</div></div>
+      <div><div class="tag-code">KG/CM²</div></div>
+      <div class="tag-what"><span class="en-text">Coil-outlet / effluent pressure (2 sensors)</span><span class="ru-text">Давление выхода змеевика (2 датчика)</span></div>
+      <div class="tag-why"><span class="en-text">Coil pressure lever — <strong>EXCLUDE for 1HA.</strong> Both sensors flat 93% of time (frozen/offline). Check other furnaces before including.</span><span class="ru-text">Давление змеевика — <strong>ИСКЛЮЧИТЬ для 1HA.</strong> Оба датчика плоские 93% времени. Проверить другие печи.</span>
+        <div><span class="warn warn-r"><span class="en-text">⛔ 1HA: sensor frozen — exclude</span><span class="ru-text">⛔ 1HA: датчик заморожен — исключить</span></span></div>
+      </div>
+    </div>
+    <div class="tag-row">
+      <div><div class="tag-code">01PC6001.PV</div><div class="tag-uom">draft · 2019→</div></div>
+      <div><div class="tag-code">MMH₂O</div></div>
+      <div class="tag-what"><span class="en-text">Convection section draft (firing lever)</span><span class="ru-text">Тяга конвекционной секции</span></div>
+      <div class="tag-why"><span class="en-text">Firing intensity proxy. Include in feature matrix; expected weak direct correlation with ΔΔ but may interact with COT.</span><span class="ru-text">Прокси интенсивности сжигания. Включить; ожидается слабая корреляция с ΔΔ.</span></div>
+    </div>
+    <div class="tag-row">
+      <div><div class="tag-code">01TI0231.PV (×4)</div><div class="tag-uom">feed_coilT · 2019→</div></div>
+      <div><div class="tag-code">°C</div></div>
+      <div class="tag-what"><span class="en-text">Feed-coil / crossover temperature (4/furnace)</span><span class="ru-text">Температура змеевика подачи (4/печь)</span></div>
+      <div class="tag-why"><span class="en-text">Preheat level. Affects cracking severity. Include in feature matrix; may explain run-to-run variation in coking onset.</span><span class="ru-text">Уровень предварительного нагрева. Влияет на жёсткость крекинга.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- GROUP 4 -->
+<div class="group" style="border-color:var(--feed-bd)">
+  <div class="group-header" style="background:var(--feed-bg)" onclick="toggle('g4')">
+    <span class="gh-icon">🧪</span>
+    <span class="gh-title" style="color:var(--feed)"><span class="en-text">Group 4 — NGL feed quality (GC analyser)</span><span class="ru-text">Группа 4 — Состав сырья NGL (GC анализатор)</span></span>
+    <span class="gh-count" style="background:var(--feed-bg);color:var(--feed);border:1px solid var(--feed-bd)"><span class="en-text">5 tags — PLANT-wide (common to all furnaces)</span><span class="ru-text">5 тегов — общие для всех 7 печей</span></span>
+    <span class="gh-priority"><span class="en-text">Priority 4 — explains inter-run variation</span><span class="ru-text">Приоритет 4 — объясняет вариацию между прогонами</span></span>
+    <span class="gh-toggle" id="t4">▾</span>
+  </div>
+  <div class="group-body" id="g4">
+    <div class="col-header">
+      <span><span class="en-text">Tag / role</span><span class="ru-text">Тег / роль</span></span>
+      <span>UoM</span>
+      <span><span class="en-text">What it measures</span><span class="ru-text">Что измеряет</span></span>
+      <span><span class="en-text">Why needed + expected sign</span><span class="ru-text">Зачем + ожидаемый знак</span></span>
+    </div>
+    <div class="tag-row">
+      <div><div class="tag-code">01AI0110.PV</div><div class="tag-uom">feed_C5p · 2019→</div></div>
+      <div><div class="tag-code">WT%</div></div>
+      <div class="tag-what"><span class="en-text">Heavy C5+ fraction in NGL feed</span><span class="ru-text">Тяжёлая фракция C5+ в сырье NGL</span></div>
+      <div class="tag-why"><span class="en-text"><strong>Strongest inter-run coking driver (+).</strong> Heavier NGL → more coke precursors. Stable across run phases (operators can't change feed) → cleanest causal signal.</span><span class="ru-text"><strong>Сильнейший межпрогонный фактор (+).</strong> Тяжелее NGL → больше прекурсоров кокса. Стабилен по фазам → чистейший причинный сигнал.</span></div>
+    </div>
+    <div class="tag-row">
+      <div><div class="tag-code">01AI0110.PV</div><div class="tag-uom">feed_CO2 · 2019→</div></div>
+      <div><div class="tag-code">PPM</div></div>
+      <div class="tag-what"><span class="en-text">CO₂ content in NGL feed</span><span class="ru-text">Содержание CO₂ в сырье NGL</span></div>
+      <div class="tag-why"><span class="en-text">Negative correlation with ΔΔ observed (ρ = −0.18). Mechanism unclear — may indicate feed slate change. Include; interpret cautiously.</span><span class="ru-text">Отрицательная корреляция с ΔΔ (ρ = −0.18). Механизм неясен. Включить; интерпретировать осторожно.</span></div>
+    </div>
+    <div class="tag-row">
+      <div><div class="tag-code">01AI0110.PV</div><div class="tag-uom">feed_C2H6/C3H8/C4H10</div></div>
+      <div><div class="tag-code">WT%</div></div>
+      <div class="tag-what"><span class="en-text">Light fractions: ethane, propane, butane</span><span class="ru-text">Лёгкие фракции: этан, пропан, бутан</span></div>
+      <div class="tag-why"><span class="en-text">Complete NGL composition balance. Lighter feed → less coking (inverse of C5+). Include to understand feed slate shifts between runs.</span><span class="ru-text">Полный баланс состава NGL. Более лёгкое сырьё → меньше коксование.</span></div>
+    </div>
+  </div>
+  <div class="section-note"><span class="en-text">All feed GC tags: furnace="PLANT" — one reading set, common to all 7 furnaces simultaneously.</span><span class="ru-text">Все теги GC подачи: furnace="PLANT" — один набор показаний, общий для всех 7 печей одновременно.</span></div>
+</div>
+
+<!-- GROUP 5 -->
+<div class="group" style="border-color:var(--yld-bd)">
+  <div class="group-header" style="background:var(--yld-bg)" onclick="toggle('g5')">
+    <span class="gh-icon">📊</span>
+    <span class="gh-title" style="color:var(--yld)"><span class="en-text">Group 5 — Effluent yield (handle with care)</span><span class="ru-text">Группа 5 — Выход продуктов (осторожно)</span></span>
+    <span class="gh-count" style="background:var(--yld-bg);color:var(--yld);border:1px solid var(--yld-bd)"><span class="en-text">~5 tags × 6 furnaces (A–F only)</span><span class="ru-text">~5 тегов × 6 печей (только A–F)</span></span>
+    <span class="gh-priority"><span class="en-text">Priority 5 — Phase 2, after GC validation</span><span class="ru-text">Приоритет 5 — Фаза 2, после валидации GC</span></span>
+    <span class="gh-toggle" id="t5">▾</span>
+  </div>
+  <div class="group-body" id="g5">
+    <div class="col-header">
+      <span><span class="en-text">Tag / role</span><span class="ru-text">Тег / роль</span></span>
+      <span>UoM</span>
+      <span><span class="en-text">What it measures</span><span class="ru-text">Что измеряет</span></span>
+      <span><span class="en-text">Why needed + caveats</span><span class="ru-text">Зачем + предупреждения</span></span>
+    </div>
+    <div class="tag-row">
+      <div><div class="tag-code">01AI1421.PV</div><div class="tag-uom">eff_C2H4 · 2025→</div></div>
+      <div><div class="tag-code">WT%</div></div>
+      <div class="tag-what"><span class="en-text">Ethylene in furnace effluent (primary product)</span><span class="ru-text">Этилен в потоке эффлюента (основной продукт)</span></div>
+      <div class="tag-why"><span class="en-text">Maps ΔΔ → yield loss (KBR value-prop deliverable). BUT: GC unreliable — quantised values, zero dropouts, 1HA pinned at 32.7 WT% through mid-2025. Validate vs lab first.</span><span class="ru-text">Связывает ΔΔ → потеря выхода (цель KBR). НО: GC ненадёжен — квантованные значения, нулевые провалы. Валидировать по лабораторным данным.</span>
+        <div><span class="warn warn-r"><span class="en-text">⛔ Unreliable — do not use in phase 1 correlations</span><span class="ru-text">⛔ Ненадёжен — не использовать в корреляциях фазы 1</span></span></div>
+      </div>
+    </div>
+    <div class="tag-row">
+      <div><div class="tag-code">01AI1421–1921.PV</div><div class="tag-uom">eff_C3H6/CH4/… · 2025→</div></div>
+      <div><div class="tag-code">WT%</div></div>
+      <div class="tag-what"><span class="en-text">Propylene, methane, ethane in effluent</span><span class="ru-text">Пропилен, метан, этан в эффлюенте</span></div>
+      <div class="tag-why"><span class="en-text">Secondary yield products. Same reliability caveats. Useful once GC confirmed with KBR/lab data.</span><span class="ru-text">Вторичные продукты выхода. Те же оговорки. Полезны после подтверждения надёжности GC.</span></div>
+    </div>
+  </div>
+  <div class="section-note"><span class="en-text">Open TODO: confirm GC reliability vs lab data with KBR before using in any model.</span><span class="ru-text">Открытая задача: подтвердить надёжность GC по лабораторным данным у KBR.</span></div>
+</div>
+
+<!-- GROUP 6 -->
+<div class="group" style="border-color:var(--neu-bd)">
+  <div class="group-header" style="background:var(--neu-bg)" onclick="toggle('g6')">
+    <span class="gh-icon">🔮</span>
+    <span class="gh-title" style="color:var(--neu)"><span class="en-text">Group 6 — Future: confounders + healthy state exploration</span><span class="ru-text">Группа 6 — Будущее: конфаундеры и исследование здорового состояния</span></span>
+    <span class="gh-count" style="background:var(--neu-bg);color:var(--neu);border:1px solid var(--neu-bd)"><span class="en-text">TBD — Phase 2+</span><span class="ru-text">TBD — Фаза 2+</span></span>
+    <span class="gh-priority"><span class="en-text">Priority 6 — add when phase 1 is complete</span><span class="ru-text">Приоритет 6 — добавить после фазы 1</span></span>
+    <span class="gh-toggle" id="t6">▾</span>
+  </div>
+  <div class="group-body" id="g6">
+    <div class="col-header" style="grid-template-columns:1fr 1fr">
+      <span><span class="en-text">Candidate tag / signal</span><span class="ru-text">Кандидат в теги / сигнал</span></span>
+      <span><span class="en-text">Why explore</span><span class="ru-text">Зачем исследовать</span></span>
+    </div>
+    <div class="future-col">
+      <div><span class="en-text">steam_hc at run START only (first 5 days)</span><span class="ru-text">steam_hc только в НАЧАЛЕ прогона (первые 5 дней)</span></div>
+      <div style="font-size:11px;color:var(--text2)"><span class="en-text">Isolates causal dilution effect from operator-feedback confounder. Late-run negative correlation is reverse causality.</span><span class="ru-text">Выделяет причинный эффект разбавления от конфаундера обратной связи. Отрицательная корреляция в конце прогона — обратная причинность.</span></div>
+    </div>
+    <div class="future-col">
+      <div><span class="en-text">pass_imbalance = std(steam_hc across A–D)</span><span class="ru-text">pass_imbalance = std(steam_hc по A–D)</span></div>
+      <div style="font-size:11px;color:var(--text2)"><span class="en-text">If one pass gets less steam → cokes faster → worst_pass is predictable. Useful for per-pass forecasting.</span><span class="ru-text">Если один пасс получает меньше пара → коксует быстрее → худший пасс предсказуем.</span></div>
+    </div>
+    <div class="future-col">
+      <div><span class="en-text">DCS alarm/event log (external)</span><span class="ru-text">Журнал тревог/событий DCS (внешний)</span></div>
+      <div style="font-size:11px;color:var(--text2)"><span class="en-text">Explains anomalous runs (Run 2/4 warmup 145–148h, Run 11 tail 195h). Needed to label runs "normal" vs "event-driven" before pooling furnaces.</span><span class="ru-text">Объясняет аномальные прогоны. Нужен для разметки "нормальный" vs "событийный" перед агрегацией по флоту.</span></div>
+    </div>
+    <div class="future-col">
+      <div><span class="en-text">resid_proxy = 1 / (feed_NM3h + steam_NM3h)</span><span class="ru-text">resid_proxy = 1 / (feed_NM3h + steam_NM3h)</span></div>
+      <div style="font-size:11px;color:var(--text2)"><span class="en-text">Relative residence time proxy (no coil geometry available). Higher throughput → shorter residence → less cracking per pass.</span><span class="ru-text">Прокси времени пребывания (геометрия змеевика недоступна). Больше пропускная способность → меньше крекинг.</span></div>
+    </div>
+    <div class="future-col">
+      <div><span class="en-text">Lab GC data (from KBR/Indorama)</span><span class="ru-text">Лабораторные данные GC (от KBR/Indorama)</span></div>
+      <div style="font-size:11px;color:var(--text2)"><span class="en-text">Ground truth for effluent yield once historian GC is validated. Needed to complete the ΔΔ → yield loss mapping.</span><span class="ru-text">Эталон для выхода после подтверждения надёжности GC историка.</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span class="en-text">olefins_ddf project · Indorama Eleme · Source: docs/data_dictionary.md · docs/methodology.md</span>
+  <span class="ru-text">Проект olefins_ddf · Indorama Eleme · Источник: docs/data_dictionary.md · docs/methodology.md</span>
+</div>
+
+<script>
+let lang='en';
+function toggleLang(){
+  lang=lang==='en'?'ru':'en';
+  document.querySelectorAll('.en-text').forEach(el=>el.style.display=lang==='en'?'':'none');
+  document.querySelectorAll('.ru-text').forEach(el=>el.style.display=lang==='ru'?'':'none');
+  document.querySelector('.lang-btn').textContent=lang==='en'?'RU / EN':'EN / RU';
+}
+document.querySelectorAll('.ru-text').forEach(el=>el.style.display='none');
+
+function toggle(id){
+  const b=document.getElementById(id);
+  const t=document.getElementById('t'+id.slice(1));
+  if(!b||!t)return;
+  const open=b.style.display!=='none';
+  b.style.display=open?'none':'';
+  t.textContent=open?'▸':'▾';
+}
+</script>
+</body>
+</html>

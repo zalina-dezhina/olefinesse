@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notebook 00b — Cell-by-Cell Explanation</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f7f6f3;--bg3:#eeedea;
+  --text:#1a1a18;--text2:#5a5a56;--text3:#8a8a84;
+  --border:rgba(0,0,0,.10);--border2:rgba(0,0,0,.18);
+  --tgt:#085041;--tgt-bg:#e1f5ee;--tgt-bd:#1d9e75;
+  --lev:#3c3489;--lev-bg:#eeedfe;--lev-bd:#7f77dd;
+  --feed:#633806;--feed-bg:#faeeda;--feed-bd:#ef9f27;
+  --dec:#993c1d;--dec-bg:#faece7;--dec-bd:#d85a30;
+  --run:#4a3000;--run-bg:#fff8ec;--run-bd:#ef9f27;
+  --warn:#a32d2d;--warn-bg:#fcebeb;--warn-bd:#e24b4a;
+  --code-bg:#f0eff8;--code-border:#c8c3f0;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1a1a18;--bg2:#242422;--bg3:#2e2e2c;
+  --text:#f0efe8;--text2:#a8a8a0;--text3:#686860;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.15);
+  --tgt:#5dcaa5;--tgt-bg:#04342c;--tgt-bd:#1d9e75;
+  --lev:#afa9ec;--lev-bg:#26215c;--lev-bd:#7f77dd;
+  --feed:#fac775;--feed-bg:#412402;--feed-bd:#ef9f27;
+  --dec:#f0997b;--dec-bg:#4a1b0c;--dec-bd:#d85a30;
+  --run:#fac775;--run-bg:#2e1f00;--run-bd:#ef9f27;
+  --warn:#f7c1c1;--warn-bg:#501313;--warn-bd:#e24b4a;
+  --code-bg:#1e1c30;--code-border:#4a4580;
+}}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);padding:20px;font-size:12px;max-width:980px;margin:0 auto}
+h1{font-size:18px;font-weight:700;margin-bottom:3px}
+.subtitle{font-size:11px;color:var(--text3);margin-bottom:18px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.lang-btn{font-size:11px;padding:4px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:inherit}
+
+/* CELL BLOCK */
+.cell{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.cell-header{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.cell-num{font-size:11px;font-weight:700;color:var(--text3)}
+.cell-title{font-size:13px;font-weight:600;flex:1}
+.cell-body{padding:12px 14px}
+
+/* CODE */
+.code-block{background:var(--code-bg);border:1px solid var(--code-border);border-radius:6px;padding:10px 12px;font-family:'SF Mono','Fira Code',monospace;font-size:10.5px;line-height:1.7;margin:8px 0;white-space:pre-wrap;overflow-x:auto;color:var(--text)}
+.cm{color:var(--text3);font-style:italic} /* comment */
+.ck{color:var(--lev)} /* keyword */
+.cs{color:var(--tgt)} /* string */
+.cn{color:var(--dec)} /* number/constant */
+.cf{color:var(--feed);font-weight:600} /* function */
+
+/* BILINGUAL */
+.bilingual{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.bi-en,.bi-ru{font-size:11px;line-height:1.65;padding:8px 10px;background:var(--bg2);border-radius:6px;border:1px solid var(--border)}
+.bi-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.55;margin-bottom:4px}
+
+/* CALLOUTS */
+.harry-note{margin-top:7px;font-size:11px;background:var(--tgt-bg);border:1px solid var(--tgt-bd);border-radius:5px;padding:6px 10px;line-height:1.6}
+.warn-note{margin-top:7px;font-size:11px;background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:5px;padding:6px 10px;color:var(--warn);line-height:1.6}
+
+/* OUTPUT TABLE */
+.out-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:11px}
+.out-table th{background:var(--bg3);padding:5px 9px;text-align:left;font-weight:600;border:1px solid var(--border)}
+.out-table td{padding:5px 9px;border:1px solid var(--border);vertical-align:top;line-height:1.55}
+
+/* BADGES */
+.badge{display:inline-block;font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;border:1px solid;white-space:nowrap}
+.b-tgt{color:var(--tgt);background:var(--tgt-bg);border-color:var(--tgt-bd)}
+.b-lev{color:var(--lev);background:var(--lev-bg);border-color:var(--lev-bd)}
+.b-feed{color:var(--feed);background:var(--feed-bg);border-color:var(--feed-bd)}
+.b-dec{color:var(--dec);background:var(--dec-bg);border-color:var(--dec-bd)}
+.b-run{color:var(--run);background:var(--run-bg);border-color:var(--run-bd)}
+.b-warn{color:var(--warn);background:var(--warn-bg);border-color:var(--warn-bd)}
+.b-out{color:#185fa5;background:#e6f1fb;border-color:#378add}
+
+/* PARAM TABLE */
+.param-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px}
+.param-table th{background:var(--bg3);padding:5px 9px;text-align:left;font-weight:600;border:1px solid var(--border)}
+.param-table td{padding:5px 9px;border:1px solid var(--border);line-height:1.55;vertical-align:top}
+.param-name{font-family:'SF Mono',monospace;font-weight:600;color:var(--lev)}
+
+/* SECTION DIVIDER */
+.sec{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin:20px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--border)}
+
+/* FLOW */
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:4px;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);margin-bottom:14px;font-size:11px}
+.flow-step{padding:4px 10px;border-radius:5px;font-weight:600;border:1px solid}
+.arrow{color:var(--text3);font-weight:600}
+
+.footer{margin-top:20px;font-size:10px;color:var(--text3);text-align:center;padding-top:10px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div>
+    <h1>Notebook 00b — Cell-by-Cell Explanation</h1>
+    <div class="subtitle"><span class="en-text">notebooks/00b_clean/notebook_00b_clean_extraction.ipynb · Indorama Eleme · 2026-06-23</span><span class="ru-text">notebooks/00b_clean/notebook_00b_clean_extraction.ipynb · Indorama Eleme · 2026-06-23</span></div>
+  </div>
+  <button class="lang-btn" onclick="toggleLang()">RU / EN</button>
+</div>
+
+<!-- OVERALL FLOW -->
+<div class="sec"><span class="en-text">What this notebook does — overview</span><span class="ru-text">Что делает этот ноутбук — общая картина</span></div>
+<div class="flow">
+  <span class="flow-step b-dec">Databricks<br><span style="font-weight:400;font-size:9px">6.6B rows</span></span>
+  <span class="arrow">→</span>
+  <span class="flow-step b-run">Feature matrix<br><span style="font-weight:400;font-size:9px">30-min buckets</span></span>
+  <span class="arrow">→</span>
+  <span class="flow-step b-lev">Detect runs<br><span style="font-weight:400;font-size:9px">feed drop → decoke</span></span>
+  <span class="arrow">→</span>
+  <span class="flow-step b-feed">Analysis windows<br><span style="font-weight:400;font-size:9px">cut warmup + tail</span></span>
+  <span class="arrow">→</span>
+  <span class="flow-step b-warn">Manual exclusions<br><span style="font-weight:400;font-size:9px">sensor faults</span></span>
+  <span class="arrow">→</span>
+  <span class="flow-step b-tgt">Clean parquet<br><span style="font-weight:400;font-size:9px">single source</span></span>
+</div>
+<div class="bilingual" style="margin-bottom:16px">
+  <div class="bi-en"><div class="bi-label">EN — PURPOSE</div>
+    This notebook is the <strong>gateway to all analysis</strong>. It connects to Databricks exactly once, pulls raw historian data for one furnace, applies all cleaning rules, and saves a clean parquet file. Every downstream notebook (01, 02a, 02b, 03…) reads ONLY from this file — they never touch Databricks again. Run once per furnace. If you re-run with new data, just re-execute this notebook.
+  </div>
+  <div class="bi-ru"><div class="bi-label">RU — НАЗНАЧЕНИЕ</div>
+    Этот ноутбук — <strong>единственная точка входа</strong> для всего анализа. Он подключается к Databricks ровно один раз, забирает сырые исторические данные для одной печи, применяет все правила очистки и сохраняет чистый parquet-файл. Все последующие ноутбуки (01, 02a, 02b, 03…) читают ТОЛЬКО из этого файла — Databricks больше не трогают. Запускать один раз на печь.
+  </div>
+</div>
+
+<!-- CELL 1: PARAMETERS -->
+<div class="sec"><span class="en-text">Cell 1 — Parameters (Papermill tag)</span><span class="ru-text">Ячейка 1 — Параметры (тег Papermill)</span></div>
+<div class="cell">
+  <div class="cell-header">
+    <span class="cell-num">[ 1 ]</span>
+    <span class="cell-title"><span class="en-text">Parameters — the only cell you change</span><span class="ru-text">Параметры — единственная ячейка которую меняешь</span></span>
+    <span class="badge b-lev">papermill tag</span>
+  </div>
+  <div class="cell-body">
+    <div class="code-block"><span class="cm"># ── Parameters (injected by papermill for batch runs) ─────────────────────</span>
+<span class="cn">FURNACE</span>    = <span class="cs">'1HA'</span>           <span class="cm"># change per furnace</span>
+<span class="cn">START</span>      = <span class="cs">'2025-02-05'</span>   <span class="cm"># dense tube TC start date</span>
+<span class="cn">END</span>        = <span class="cs">'2026-03-20'</span>
+<span class="cn">BUCKET_MIN</span> = <span class="cs">30</span>             <span class="cm"># minutes — 30 min for feature matrix</span>
+<span class="cn">OUTPUT_DIR</span> = <span class="cs">'output'</span>
+
+<span class="cm"># ── Analysis window thresholds ─────────────────────────────────────────────</span>
+<span class="cn">FEED_SETTLED_FRAC</span> = <span class="cs">0.95</span>   <span class="cm"># feed > 95% run median = feed is up</span>
+<span class="cn">COT_STD_THRESH_C</span>  = <span class="cs">2.0</span>    <span class="cm"># rolling std(COT) &lt; 2°C over 4h = COT settled</span>
+<span class="cn">COT_ROLL_STEPS</span>    = <span class="cs">8</span>      <span class="cm"># 8 steps × 30 min = 4 hours</span>
+<span class="cn">MIN_WARMUP_H</span>      = <span class="cs">12.0</span>   <span class="cm"># always skip first 12h (Delta-Delta baseline window)</span></div>
+
+    <table class="param-table">
+      <tr><th>Parameter</th><th><span class="en-text">What it does</span><span class="ru-text">Что делает</span></th><th><span class="en-text">Why this value</span><span class="ru-text">Почему такое значение</span></th></tr>
+      <tr>
+        <td><span class="param-name">FURNACE</span></td>
+        <td><span class="en-text">Which of the 7 furnaces to process (1HA–1HG)</span><span class="ru-text">Какую из 7 печей обрабатывать (1HA–1HG)</span></td>
+        <td><span class="en-text">Injected automatically by papermill when running <code>run_all_furnaces.sh</code></span><span class="ru-text">Подставляется автоматически через papermill при запуске <code>run_all_furnaces.sh</code></span></td>
+      </tr>
+      <tr>
+        <td><span class="param-name">START</span></td>
+        <td><span class="en-text">Start of data window</span><span class="ru-text">Начало временного окна</span></td>
+        <td><span class="en-text">2025-02-05 = first date dense per-tube TCs (192 tubes) are in the historian. Before this only 8-tube proxy available.</span><span class="ru-text">2025-02-05 = первая дата плотных TC по трубкам (192 трубки) в historian. До этого — только 8-трубочный прокси.</span></td>
+      </tr>
+      <tr>
+        <td><span class="param-name">BUCKET_MIN</span></td>
+        <td><span class="en-text">Time bucket size for feature matrix aggregation</span><span class="ru-text">Размер временного бакета для агрегации feature matrix</span></td>
+        <td><span class="en-text">30 min balances detail vs noise. Tube TCs sample ~1/min, GC analysers ~1/hour. 30 min captures GC + smooths TC noise.</span><span class="ru-text">30 мин — баланс между детальностью и шумом. ТС трубок ~1/мин, ГХ-анализаторы ~1/ч. 30 мин захватывает ГХ и сглаживает шум ТС.</span></td>
+      </tr>
+      <tr>
+        <td><span class="param-name">FEED_SETTLED_FRAC = 0.95</span></td>
+        <td><span class="en-text">Feed must be ≥ 95% of run median to count as "operational"</span><span class="ru-text">Подача должна быть ≥ 95% медианы пробега чтобы считаться "рабочей"</span></td>
+        <td><span class="en-text">Cuts warmup ramp (feed rising) and pre-decoke tail (feed falling). 95% is tight enough to exclude transitions but loose enough not to cut stable operation.</span><span class="ru-text">Отрезает прогрев (подача растёт) и хвост перед декоксом (подача падает). 95% — достаточно строго чтобы отсечь переходы, но не слишком чтобы не резать стабильный режим.</span></td>
+      </tr>
+      <tr>
+        <td><span class="param-name">COT_STD_THRESH_C = 2.0</span></td>
+        <td><span class="en-text">Rolling std of COT must be &lt; 2°C over 4h to count as settled</span><span class="ru-text">Скользящее стандартное отклонение COT должно быть &lt; 2°C за 4ч чтобы считаться устоявшимся</span></td>
+        <td><span class="en-text">During warmup operators ramp the COT setpoint — std is high. Once stable, COT drifts slowly, std drops below 2°C. This catches any furnace that takes longer than 12h to settle.</span><span class="ru-text">Во время прогрева операторы поднимают уставку COT — std высокое. После стабилизации COT дрейфует медленно, std падает ниже 2°C. Это ловит печи которые устанавливаются дольше 12 ч.</span></td>
+      </tr>
+      <tr>
+        <td><span class="param-name">MIN_WARMUP_H = 12.0</span></td>
+        <td><span class="en-text">Always skip the first 12h of every run, regardless of feed/COT</span><span class="ru-text">Всегда пропускать первые 12 ч каждого пробега независимо от подачи/COT</span></td>
+        <td><span class="en-text">The Delta-Delta baseline is computed from the first 12h of a run. If we include those rows in analysis, baseline and signal overlap — circular. 12h is also the minimum warm-up agreed with Harry.</span><span class="ru-text">Базовая линия Delta-Delta вычисляется из первых 12 ч пробега. Если включить эти строки в анализ, базовая линия и сигнал перекрываются — получается круг. 12 ч — минимальный прогрев согласованный с Harry.</span></td>
+      </tr>
+    </table>
+
+    <div class="harry-note">💬 <span class="en-text"><strong>Papermill magic:</strong> The cell has a special tag <code>"parameters"</code> in its metadata. When you run <code>bash run_all_furnaces.sh</code>, papermill injects e.g. <code>FURNACE='1HB'</code> into this cell automatically — you never edit the notebook itself for each furnace.</span><span class="ru-text"><strong>Papermill-магия:</strong> Ячейка имеет специальный тег <code>"parameters"</code> в метаданных. Когда ты запускаешь <code>bash run_all_furnaces.sh</code>, papermill автоматически подставляет например <code>FURNACE='1HB'</code> — редактировать ноутбук вручную для каждой печи не нужно.</span></div>
+  </div>
+</div>
+
+<!-- CELL 2: CONNECT TO DATABRICKS -->
+<div class="sec"><span class="en-text">Cell 2 — Connect to Databricks &amp; load catalog</span><span class="ru-text">Ячейка 2 — Подключение к Databricks и загрузка каталога</span></div>
+<div class="cell">
+  <div class="cell-header">
+    <span class="cell-num">[ 2 ]</span>
+    <span class="cell-title"><span class="en-text">Spark session + tag catalog</span><span class="ru-text">Spark-сессия + каталог тегов</span></span>
+    <span class="badge b-dec">Databricks</span>
+  </div>
+  <div class="cell-body">
+    <div class="code-block"><span class="cf">spark</span>   = <span class="cf">get_spark</span>()                  <span class="cm"># uses DDF_CLUSTER_ID env var</span>
+<span class="cf">catalog</span> = cat.<span class="cf">build_catalog</span>(spark)    <span class="cm"># from cache unless refresh=True</span>
+
+tube_tags = catalog[catalog[<span class="cs">'role'</span>] == <span class="cs">'tube_COT'</span>]
+tube_tags = tube_tags[tube_tags[<span class="cs">'furnace'</span>] == FURNACE]
+<span class="cf">print</span>(<span class="cs">f'tube_COT for {FURNACE}: {len(tube_tags)} tags (expect 192)'</span>)</div>
+
+    <div class="bilingual">
+      <div class="bi-en"><div class="bi-label">EN</div>
+        <strong>get_spark()</strong> uses the environment variable <code>DDF_CLUSTER_ID</code> to connect to the running Databricks cluster via <code>databricks-connect</code>. This is NOT a regular pyspark job — it runs SQL on the remote cluster but returns results as pandas locally.<br><br>
+        <strong>build_catalog()</strong> queries the Unity Catalog metadata table (~4119 tags) and classifies every tag into roles: tube_COT, feed_flow, dil_steam, cot_ctrl, etc. It reads from cache file <code>output/dd_tag_catalog.csv</code> if it exists (fast, ~1s). Pass <code>refresh=True</code> if you added tags.<br><br>
+        <strong>Sanity check:</strong> The print should say 192 tube_COT tags. If it shows 127, the catalog is using old description-based matching (bug). If it shows 0, the cluster ID is wrong.
+      </div>
+      <div class="bi-ru"><div class="bi-label">RU</div>
+        <strong>get_spark()</strong> использует переменную окружения <code>DDF_CLUSTER_ID</code> для подключения к работающему кластеру Databricks через <code>databricks-connect</code>. Это НЕ обычный pyspark — он выполняет SQL на удалённом кластере, но возвращает результаты локально как pandas.<br><br>
+        <strong>build_catalog()</strong> запрашивает таблицу метаданных Unity Catalog (~4119 тегов) и классифицирует каждый тег по ролям: tube_COT, feed_flow, dil_steam, cot_ctrl и т.д. Читает из кэша <code>output/dd_tag_catalog.csv</code> если он есть (быстро, ~1с). Передай <code>refresh=True</code> если добавились новые теги.<br><br>
+        <strong>Проверка:</strong> print должен показать 192 тега tube_COT. Если 127 — каталог использует старый поиск по описанию (баг). Если 0 — неверный ID кластера.
+      </div>
+    </div>
+    <div class="warn-note">⚠️ <span class="en-text"><strong>Cluster must be running.</strong> If you get a connection error, run <code>python check_databricks.py</code> first. The cluster ID changes every restart — update <code>DDF_CLUSTER_ID</code> in your <code>.env</code> file.</span><span class="ru-text"><strong>Кластер должен быть запущен.</strong> Если ошибка подключения — сначала запусти <code>python check_databricks.py</code>. ID кластера меняется при каждом перезапуске — обновляй <code>DDF_CLUSTER_ID</code> в файле <code>.env</code>.</span></div>
+  </div>
+</div>
+
+<!-- CELL 3: FEATURE MATRIX -->
+<div class="sec"><span class="en-text">Cell 3 — Load feature matrix</span><span class="ru-text">Ячейка 3 — Загрузка feature matrix</span></div>
+<div class="cell">
+  <div class="cell-header">
+    <span class="cell-num">[ 3 ]</span>
+    <span class="cell-title"><span class="en-text">Build or load feature matrix — the main data table</span><span class="ru-text">Построить или загрузить feature matrix — главная таблица данных</span></span>
+    <span class="badge b-run">30-min buckets</span>
+  </div>
+  <div class="cell-body">
+    <div class="code-block"><span class="ck">if</span> os.path.<span class="cf">exists</span>(FEAT_PARQUET):
+    feat = pd.<span class="cf">read_parquet</span>(FEAT_PARQUET)           <span class="cm"># fast, ~1s</span>
+<span class="ck">else</span>:
+    feat, _ = feat_mod.<span class="cf">build_feature_matrix</span>(
+        spark, catalog, FURNACE,
+        start=START, end=END, bucket=BUCKET_MIN       <span class="cm"># slow, 5–10 min</span>
+    )
+    feat.<span class="cf">to_parquet</span>(FEAT_PARQUET)</div>
+
+    <div class="bilingual">
+      <div class="bi-en"><div class="bi-label">EN — WHAT IS THE FEATURE MATRIX?</div>
+        A single wide table, one row per 30-minute time bucket, indexed by timestamp. Columns include everything:<br><br>
+        <strong>Operating levers:</strong> cot, feed_total, steam_hc, coil_out_P, draft, feed_coilT<br>
+        <strong>Feed composition (GC):</strong> feed_C2H6, feed_C3H8, feed_C4H10, feed_C5p, feed_CO2<br>
+        <strong>Delta-Delta health:</strong> dd_abs_max, dd_p95, delta_spread, coking_rate<br>
+        <strong>Run structure:</strong> run_id, run_age_days, cracking (boolean mask)<br>
+        <strong>Per-pass:</strong> dd_abs_max_A/B/C/D, steam_hc_A/B/C/D<br><br>
+        <code>build_feature_matrix</code> queries Databricks, aligns all tags to 30-min buckets, computes Delta-Delta from the 192 tube TCs, and returns this table. It takes 5–10 min the first time. After that, read from parquet cache.
+      </div>
+      <div class="bi-ru"><div class="bi-label">RU — ЧТО ТАКОЕ FEATURE MATRIX?</div>
+        Единая широкая таблица, одна строка на 30-минутный временной бакет, индексирована по времени. Колонки включают всё:<br><br>
+        <strong>Рычаги управления:</strong> cot, feed_total, steam_hc, coil_out_P, draft, feed_coilT<br>
+        <strong>Состав сырья (ГХ):</strong> feed_C2H6, feed_C3H8, feed_C4H10, feed_C5p, feed_CO2<br>
+        <strong>Здоровье Delta-Delta:</strong> dd_abs_max, dd_p95, delta_spread, coking_rate<br>
+        <strong>Структура пробегов:</strong> run_id, run_age_days, cracking (булева маска)<br>
+        <strong>По пассам:</strong> dd_abs_max_A/B/C/D, steam_hc_A/B/C/D<br><br>
+        <code>build_feature_matrix</code> запрашивает Databricks, выравнивает все теги по 30-мин бакетам, вычисляет Delta-Delta из 192 TC трубок и возвращает эту таблицу. Первый раз: 5–10 мин. После — читать из кэша parquet.
+      </div>
+    </div>
+    <div class="harry-note">💬 <span class="en-text"><strong>Key column: dd_abs_max</strong> = the worst (largest) Delta-Delta tube in the furnace at any moment. This is the primary health signal — the one that triggers a decoke when it reaches 45°C. All correlations in notebooks 02a/02b target this column.</span><span class="ru-text"><strong>Ключевая колонка: dd_abs_max</strong> = худшая (наибольшая) Delta-Delta трубка в печи в каждый момент. Это основной сигнал здоровья — тот что запускает декокс при достижении 45°C. Все корреляции в ноутбуках 02a/02b нацелены на эту колонку.</span></div>
+  </div>
+</div>
+
+<!-- CELL 4: DETECT RUNS -->
+<div class="sec"><span class="en-text">Cell 4 — Detect cracking runs</span><span class="ru-text">Ячейка 4 — Определение пробегов крекинга</span></div>
+<div class="cell">
+  <div class="cell-header">
+    <span class="cell-num">[ 4 ]</span>
+    <span class="cell-title"><span class="en-text">cracking_mask + segment_runs — the cycle detector</span><span class="ru-text">cracking_mask + segment_runs — детектор циклов</span></span>
+    <span class="badge b-dec">decoke detection</span>
+  </div>
+  <div class="cell-body">
+    <div class="code-block">mask = <span class="cf">cracking_mask</span>(feat[<span class="cs">'feed_total'</span>])  <span class="cm"># True where feed > threshold = cracking</span>
+runs = <span class="cf">segment_runs</span>(mask)                  <span class="cm"># list of Run objects</span>
+
+<span class="ck">for</span> r <span class="ck">in</span> runs:
+    <span class="cf">print</span>(<span class="cs">f'Run {r.index}: {r.start.date()} → {r.end.date()}  ({r.length_days:.1f} d)'</span>)</div>
+
+    <div class="bilingual">
+      <div class="bi-en"><div class="bi-label">EN — HOW IT WORKS</div>
+        <strong>cracking_mask(feed_total)</strong> returns a boolean Series: <code>True</code> when <code>feed_total > 30% of running level</code> (hydrocarbon feed is flowing = cracking is happening). <code>False</code> when feed drops to ~0 = decoke is happening.<br><br>
+        <strong>Why NOT temperature?</strong> A decoke does NOT cool the furnace — operators burn coke off with steam/air while firing continues. The tubes stay hot. Using temperature would merge many runs into one giant "run" of 43–195 days — completely wrong.<br><br>
+        <strong>segment_runs(mask)</strong> finds contiguous <code>True</code> blocks, with: gaps ≥ 6h split runs (real decoke), blips &lt; 6h do NOT split (sensor noise / brief feed interruption).<br><br>
+        Each <code>Run</code> object has: <code>run.start</code>, <code>run.end</code>, <code>run.length_days</code>, <code>run.index</code>.
+      </div>
+      <div class="bi-ru"><div class="bi-label">RU — КАК РАБОТАЕТ</div>
+        <strong>cracking_mask(feed_total)</strong> возвращает булеву серию: <code>True</code> когда <code>feed_total > 30% рабочего уровня</code> (углеводородная подача идёт = крекинг происходит). <code>False</code> когда подача падает до ~0 = идёт декокс.<br><br>
+        <strong>Почему НЕ температура?</strong> Декокс НЕ охлаждает печь — операторы выжигают кокс паром/воздухом при продолжающемся горении. Трубки остаются горячими. Использование температуры объединило бы много пробегов в один гигантский "пробег" на 43–195 дней — полностью неверно.<br><br>
+        <strong>segment_runs(mask)</strong> находит непрерывные блоки <code>True</code>, при этом: разрывы ≥ 6ч разделяют пробеги (настоящий декокс), всплески &lt; 6ч НЕ разделяют (шум датчиков / кратковременное прерывание подачи).<br><br>
+        Каждый объект <code>Run</code> имеет: <code>run.start</code>, <code>run.end</code>, <code>run.length_days</code>, <code>run.index</code>.
+      </div>
+    </div>
+    <div class="warn-note">⚠️ <span class="en-text"><strong>Expected output for 1HA:</strong> ~16 runs, lengths 5–31 days. If you see runs of 40+ days → cracking_mask threshold may need tuning, or there's a data gap. If you see runs of 1–2 days → feed data has frequent dropouts (check tag quality).</span><span class="ru-text"><strong>Ожидаемый вывод для 1HA:</strong> ~16 пробегов, длиной 5–31 день. Если видишь пробеги 40+ дней → порог cracking_mask нужно настроить, или есть пробел в данных. Если пробеги 1–2 дня → частые пропуски данных подачи (проверь качество тега).</span></div>
+  </div>
+</div>
+
+<!-- CELL 5: ANALYSIS WINDOWS -->
+<div class="sec"><span class="en-text">Cell 5 — Find analysis windows (the core function)</span><span class="ru-text">Ячейка 5 — Нахождение окон анализа (ключевая функция)</span></div>
+<div class="cell">
+  <div class="cell-header">
+    <span class="cell-num">[ 5 ]</span>
+    <span class="cell-title"><span class="en-text">find_analysis_window() — where to cut warmup and tail</span><span class="ru-text">find_analysis_window() — где обрезать прогрев и хвост</span></span>
+    <span class="badge b-feed">3 criteria</span>
+  </div>
+  <div class="cell-body">
+    <div class="code-block"><span class="ck">def</span> <span class="cf">find_analysis_window</span>(run, feat_df):
+
+    <span class="cm"># Criterion 1: feed at operating level</span>
+    run_med_feed = seg[<span class="cs">'feed_total'</span>][seg[<span class="cs">'feed_total'</span>] > <span class="cn">0</span>].<span class="cf">median</span>()
+    feed_ok = seg[<span class="cs">'feed_total'</span>] > FEED_SETTLED_FRAC * run_med_feed
+
+    <span class="cm"># Criterion 2: COT settled (rolling std &lt; threshold)</span>
+    cot_std = seg[cot_col].<span class="cf">rolling</span>(COT_ROLL_STEPS, min_periods=<span class="cn">2</span>).<span class="cf">std</span>()
+    cot_ok  = cot_std < COT_STD_THRESH_C
+
+    <span class="cm"># Criterion 3: minimum time past run start</span>
+    time_ok = seg.index >= earliest_start   <span class="cm"># run.start + 12h</span>
+
+    <span class="cm"># Combined: ALL THREE must be True simultaneously</span>
+    settled_mask = feed_ok & cot_ok & time_ok
+
+    analysis_start = settled_mask[settled_mask].index[<span class="cn">0</span>]  <span class="cm"># first settled point</span>
+    analysis_end   = feed_ok[feed_ok].index[-<span class="cn">1</span>]            <span class="cm"># last point feed still up</span></div>
+
+    <div class="bilingual">
+      <div class="bi-en"><div class="bi-label">EN — THE 3 CRITERIA IN DETAIL</div>
+        <strong>Criterion 1 — feed_ok:</strong> Feed must be ≥ 95% of the run's own median. The median is computed per-run (not fixed). This removes: (a) warmup ramp where feed is stepping from 0 up to operational level; (b) pre-decoke tail where operators reduce feed before stopping.<br><br>
+        <strong>Criterion 2 — cot_ok:</strong> Rolling standard deviation of COT over the last 4 hours (8 × 30min buckets) must be &lt; 2°C. During warmup, the COT setpoint is ramped up step by step — std is high. Once the target severity is reached and held, std drops. This catches late settlers (furnaces that need >12h).<br><br>
+        <strong>Criterion 3 — time_ok:</strong> Always skip the first 12 hours no matter what. Even if feed is up and COT is stable, the Delta-Delta baseline is being computed during this window. Including it would mean baseline = signal = circular analysis.<br><br>
+        <strong>analysis_start</strong> = first timestamp where ALL THREE are True.<br>
+        <strong>analysis_end</strong> = last timestamp where feed is still at operational level (tail cut).
+      </div>
+      <div class="bi-ru"><div class="bi-label">RU — 3 КРИТЕРИЯ ПОДРОБНО</div>
+        <strong>Критерий 1 — feed_ok:</strong> Подача должна быть ≥ 95% медианы собственного пробега. Медиана вычисляется по-пробежно (не фиксированная). Убирает: (а) прогревной разгон где подача ступенями растёт от 0 до рабочего уровня; (б) хвост перед декоксом где операторы снижают подачу перед остановкой.<br><br>
+        <strong>Критерий 2 — cot_ok:</strong> Скользящее стандартное отклонение COT за последние 4 часа (8 × 30мин бакета) должно быть &lt; 2°C. Во время прогрева уставка COT поднимается ступенями — std высокое. Как только целевая жёсткость достигнута и удерживается, std падает. Ловит "поздних" — печи которым нужно >12ч.<br><br>
+        <strong>Критерий 3 — time_ok:</strong> Всегда пропускать первые 12 часов что бы ни было. Даже если подача на уровне и COT стабилен — в этом окне вычисляется базовая линия Delta-Delta. Включить её = базовая линия = сигнал = анализ по кругу.<br><br>
+        <strong>analysis_start</strong> = первый timestamp где ВСЕ ТРИ условия выполнены.<br>
+        <strong>analysis_end</strong> = последний timestamp где подача ещё на рабочем уровне (обрезка хвоста).
+      </div>
+    </div>
+    <div class="harry-note">💬 <span class="en-text"><strong>Output of this cell</strong> is <code>win_df</code> — a table with one row per run showing: run_start, run_end, analysis_start, analysis_end, warmup_hours, tail_hours, clean_days, settled (True/False). If <code>settled=False</code>, the function fell back to <code>run.start + 12h</code> — the run may be too short or the feed data is noisy.</span><span class="ru-text"><strong>Результат этой ячейки</strong> — <code>win_df</code> — таблица с одной строкой на пробег: run_start, run_end, analysis_start, analysis_end, warmup_hours, tail_hours, clean_days, settled (True/False). Если <code>settled=False</code> — функция вернулась к <code>run.start + 12h</code> — пробег слишком короткий или данные подачи зашумлены.</span></div>
+  </div>
+</div>
+
+<!-- CELL 6: APPLY CUTS -->
+<div class="sec"><span class="en-text">Cell 6 — Apply all cuts</span><span class="ru-text">Ячейка 6 — Применение всех срезов</span></div>
+<div class="cell">
+  <div class="cell-header">
+    <span class="cell-num">[ 6 ]</span>
+    <span class="cell-title"><span class="en-text">Build clean_mask — keep only valid analysis windows</span><span class="ru-text">Построить clean_mask — оставить только валидные окна анализа</span></span>
+    <span class="badge b-tgt">clean data</span>
+  </div>
+  <div class="cell-body">
+    <div class="code-block">clean_mask = pd.Series(<span class="cn">False</span>, index=feat.index)  <span class="cm"># start: everything excluded</span>
+run_id_col = pd.Series(np.nan, index=feat.index)
+
+<span class="ck">for</span> _, w <span class="ck">in</span> valid_runs.<span class="cf">iterrows</span>():
+    in_window = (feat.index >= w[<span class="cs">'analysis_start'</span>]) & \
+                (feat.index <= w[<span class="cs">'analysis_end'</span>])
+    clean_mask[in_window] = <span class="cn">True</span>
+    run_id_col[in_window] = <span class="cf">int</span>(w[<span class="cs">'run'</span>])
+
+feat_clean = feat[clean_mask].<span class="cf">copy</span>()
+feat_clean[<span class="cs">'run_id'</span>] = run_id_col[clean_mask].<span class="cf">astype</span>(<span class="cf">int</span>)
+feat_clean[<span class="cs">'phase'</span>] = <span class="cs">'clean'</span></div>
+
+    <div class="bilingual">
+      <div class="bi-en"><div class="bi-label">EN — WHAT IS REMOVED AND WHY</div>
+        The logic starts with everything <code>False</code> (excluded) and only sets <code>True</code> inside valid analysis windows. This means 4 categories are removed:<br><br>
+        1. <strong>Before first complete cycle</strong> — no decoke on both sides → incomplete cycle, no run baseline<br>
+        2. <strong>Decoking periods</strong> — feed ≈ 0, tubes coated with steam/air, no cracking happening<br>
+        3. <strong>Warm-up (first 12h + unsettled)</strong> — Delta-Delta baseline window, COT ramping up<br>
+        4. <strong>Pre-decoke tail</strong> — operators reducing feed, conditions not representative<br><br>
+        The two added columns: <code>run_id</code> = integer run number (allows you to group/iterate over individual runs), <code>phase='clean'</code> = tag so you always know this DataFrame is the clean version.
+      </div>
+      <div class="bi-ru"><div class="bi-label">RU — ЧТО УДАЛЯЕТСЯ И ПОЧЕМУ</div>
+        Логика начинает с <code>False</code> (всё исключено) и устанавливает <code>True</code> только внутри валидных окон анализа. Это значит 4 категории удаляются:<br><br>
+        1. <strong>До первого полного цикла</strong> — нет декокса с обеих сторон → неполный цикл, нет базовой линии пробега<br>
+        2. <strong>Периоды декоксования</strong> — подача ≈ 0, трубки обрабатываются паром/воздухом, крекинга нет<br>
+        3. <strong>Прогрев (первые 12ч + неустоявшееся)</strong> — окно базовой линии Delta-Delta, COT разгоняется<br>
+        4. <strong>Хвост перед декоксом</strong> — операторы снижают подачу, условия нерепрезентативны<br><br>
+        Две добавляемые колонки: <code>run_id</code> = номер пробега целым числом (позволяет группировать/итерировать по пробегам), <code>phase='clean'</code> = метка что этот DataFrame — чистая версия.
+      </div>
+    </div>
+    <div class="harry-note">💬 <span class="en-text"><strong>Expect:</strong> Typically 60–70% of raw rows are kept. The rest is decoking + warmup + tail. Print statement shows the exact percentage. If &lt; 40% kept, something is wrong (too many decoking rows, bad feed data, or thresholds too tight).</span><span class="ru-text"><strong>Ожидать:</strong> Обычно сохраняется 60–70% сырых строк. Остальное — декоксование + прогрев + хвост. Print-выражение показывает точный процент. Если &lt; 40% сохранено — что-то не так (слишком много строк декоксования, плохие данные подачи или слишком жёсткие пороги).</span></div>
+  </div>
+</div>
+
+<!-- CELL 7: MANUAL EXCLUSIONS -->
+<div class="sec"><span class="en-text">Cell 7 — Manual exclusions</span><span class="ru-text">Ячейка 7 — Ручные исключения</span></div>
+<div class="cell">
+  <div class="cell-header">
+    <span class="cell-num">[ 7 ]</span>
+    <span class="cell-title"><span class="en-text">Known sensor faults — NaN out bad periods</span><span class="ru-text">Известные сбои датчиков — обнулить плохие периоды</span></span>
+    <span class="badge b-warn">sensor faults</span>
+  </div>
+  <div class="cell-body">
+    <div class="code-block">MANUAL_EXCLUDE = [
+    <span class="cm"># ('Run9_sensor_fault', '2025-10-28', '2025-11-02'),  # ~120°C spike, verify first</span>
+]
+
+<span class="ck">for</span> reason, t0, t1 <span class="ck">in</span> MANUAL_EXCLUDE:
+    feat_clean.loc[mask_exc, <span class="cs">'dd_abs_max'</span>] = np.nan   <span class="cm"># NaN, not delete</span></div>
+
+    <div class="bilingual">
+      <div class="bi-en"><div class="bi-label">EN</div>
+        This list is for events that passed the automated filter but are physically impossible — like a 120°C dd_abs_max spike that lasts 3+ hours (the sensor froze then jumped). Harry's rule: <strong>only exclude events verified in DCS</strong>. A real high-coking period must stay in the data even if it looks like an outlier — it is the most important signal.<br><br>
+        Note: we NaN the values (not delete the rows). This preserves the time index continuity for trajectory plots.
+      </div>
+      <div class="bi-ru"><div class="bi-label">RU</div>
+        Этот список — для событий которые прошли автоматический фильтр но физически невозможны — например скачок dd_abs_max на 120°C длиной 3+ часа (датчик завис, потом прыгнул). Правило Harry: <strong>исключать только события подтверждённые в DCS</strong>. Настоящий период высокого коксования должен остаться в данных даже если выглядит как выброс — это и есть самый важный сигнал.<br><br>
+        Заметка: мы ставим NaN (не удаляем строки). Это сохраняет непрерывность временного индекса для графиков траекторий.
+      </div>
+    </div>
+    <div class="warn-note">⚠️ <span class="en-text">The spike in Run 9 (1HA, ~Oct/Nov 2025) is <strong>commented out</strong> until DCS verification. Do NOT uncomment without checking with Harry that it is indeed a sensor fault and not real high-coking behaviour.</span><span class="ru-text">Скачок в Run 9 (1HA, ~окт/ноя 2025) <strong>закомментирован</strong> до проверки в DCS. НЕ раскомментируй без подтверждения Harry что это сбой датчика, а не настоящее сильное коксование.</span></div>
+  </div>
+</div>
+
+<!-- CELL 8: SAVE -->
+<div class="sec"><span class="en-text">Cell 8 — Save clean parquet</span><span class="ru-text">Ячейка 8 — Сохранение чистого parquet</span></div>
+<div class="cell">
+  <div class="cell-header">
+    <span class="cell-num">[ 8 ]</span>
+    <span class="cell-title"><span class="en-text">Write output/{FURNACE}/00b_clean/{FURNACE}_clean.parquet</span><span class="ru-text">Записать output/{FURNACE}/00b_clean/{FURNACE}_clean.parquet</span></span>
+    <span class="badge b-out">output files</span>
+  </div>
+  <div class="cell-body">
+    <div class="bilingual">
+      <div class="bi-en"><div class="bi-label">EN — OUTPUT FILES</div></div>
+      <div class="bi-ru"><div class="bi-label">RU — ВЫХОДНЫЕ ФАЙЛЫ</div></div>
+    </div>
+    <table class="out-table">
+      <tr><th>File</th><th><span class="en-text">What it contains</span><span class="ru-text">Что содержит</span></th><th><span class="en-text">How to use in downstream</span><span class="ru-text">Как использовать дальше</span></th></tr>
+      <tr>
+        <td><code style="font-size:10px">output/1HA/00b_clean/<br>1HA_clean.parquet</code></td>
+        <td><span class="en-text">Clean feature matrix — only the valid analysis window rows. Columns: all original features + run_id + phase</span><span class="ru-text">Чистая feature matrix — только строки валидных окон анализа. Колонки: все исходные признаки + run_id + phase</span></td>
+        <td><code style="font-size:10px">feat = pd.read_parquet(<br>&nbsp;&nbsp;"output/1HA/00b_clean/<br>&nbsp;&nbsp;1HA_clean.parquet")</code></td>
+      </tr>
+      <tr>
+        <td><code style="font-size:10px">output/1HA/00b_clean/<br>run_analysis_windows.csv</code></td>
+        <td><span class="en-text">Table of all run windows: run_start, run_end, analysis_start, analysis_end, warmup_hours, tail_hours, clean_days, settled</span><span class="ru-text">Таблица всех окон пробегов: run_start, run_end, analysis_start, analysis_end, warmup_hours, tail_hours, clean_days, settled</span></td>
+        <td><span class="en-text">Read when you need run metadata (e.g. plotting run boundaries, computing per-run statistics)</span><span class="ru-text">Читать когда нужны метаданные пробегов (например отрисовка границ пробегов, статистика по пробегам)</span></td>
+      </tr>
+      <tr>
+        <td><code style="font-size:10px">output/1HA/00b_clean/<br>1HA_00b_clean_extraction.png</code></td>
+        <td><span class="en-text">3-panel verification plot (see Cell 9)</span><span class="ru-text">Верификационный график из 3 панелей (см. Ячейку 9)</span></td>
+        <td><span class="en-text">Visual QA — open this first to confirm the cuts look right</span><span class="ru-text">Визуальный контроль качества — открыть первым чтобы убедиться что срезы выглядят правильно</span></td>
+      </tr>
+    </table>
+    <div class="harry-note">💬 <span class="en-text"><strong>Golden rule:</strong> After this notebook runs, all downstream notebooks load <code>feat_clean = pd.read_parquet(..._clean.parquet)</code> and work directly. No further filtering needed — all rows are already clean cracking windows.</span><span class="ru-text"><strong>Золотое правило:</strong> После этого ноутбука все последующие загружают <code>feat_clean = pd.read_parquet(..._clean.parquet)</code> и работают напрямую. Дополнительная фильтрация не нужна — все строки уже чистые окна крекинга.</span></div>
+  </div>
+</div>
+
+<!-- CELL 9: VERIFICATION PLOT -->
+<div class="sec"><span class="en-text">Cell 9 — Verification plot (how to inspect results)</span><span class="ru-text">Ячейка 9 — Верификационный график (как проверять результаты)</span></div>
+<div class="cell">
+  <div class="cell-header">
+    <span class="cell-num">[ 9 ]</span>
+    <span class="cell-title"><span class="en-text">3-panel QA plot — green kept · red removed</span><span class="ru-text">3-панельный QA-график — зелёный = оставлено · красный = удалено</span></span>
+    <span class="badge b-tgt">visual QA</span>
+  </div>
+  <div class="cell-body">
+    <div class="bilingual">
+      <div class="bi-en"><div class="bi-label">EN — HOW TO READ THE PLOT</div>
+        <strong>Panel 1 — feed_total:</strong> Blue = raw data, green = kept. You should see: red at the start of each run (warmup ramp), red at the end of each run (tail), grey between runs (decoke). All clean periods should be at the same high level.<br><br>
+        <strong>Panel 2 — COT:</strong> Purple = raw, dark green = kept. Check that the COT in the green region is flat/stable. If COT is still ramping in the green region → COT_STD_THRESH_C may need to be tightened.<br><br>
+        <strong>Panel 3 — dd_abs_max:</strong> Orange = raw, red-orange = kept. The green shading shows analysis windows. The dashed lines at 30°C (pre-alarm) and 45°C (alarm) are reference levels. You want to see dd_abs_max growing from ~0 at run start to its peak near run end within each green window.<br><br>
+        <strong>Red vertical bands</strong> = warmup + tail (excluded). <strong>Grey gaps</strong> = decoking periods (excluded). <strong>Green bands</strong> = analysis windows (kept).
+      </div>
+      <div class="bi-ru"><div class="bi-label">RU — КАК ЧИТАТЬ ГРАФИК</div>
+        <strong>Панель 1 — feed_total:</strong> Синий = сырые данные, зелёный = оставлено. Должно быть видно: красное в начале каждого пробега (прогрев), красное в конце (хвост), серое между пробегами (декокс). Все чистые периоды должны быть на одном высоком уровне.<br><br>
+        <strong>Панель 2 — COT:</strong> Фиолетовый = сырой, тёмно-зелёный = оставлено. Проверь что COT в зелёной области ровный/стабильный. Если COT ещё разгоняется в зелёной зоне → COT_STD_THRESH_C нужно ужесточить.<br><br>
+        <strong>Панель 3 — dd_abs_max:</strong> Оранжевый = сырой, красно-оранжевый = оставлено. Зелёная заливка показывает окна анализа. Пунктирные линии на 30°C (предсигнал) и 45°C (сигнал тревоги) — справочные уровни. Должно быть видно как dd_abs_max растёт от ~0 в начале пробега до пика в конце в каждом зелёном окне.<br><br>
+        <strong>Красные вертикальные полосы</strong> = прогрев + хвост (исключены). <strong>Серые промежутки</strong> = декоксование (исключено). <strong>Зелёные полосы</strong> = окна анализа (оставлено).
+      </div>
+    </div>
+    <div class="warn-note">⚠️ <span class="en-text"><strong>Red flags in the plot:</strong> (1) Green region starts while feed is still ramping → FEED_SETTLED_FRAC too low; (2) Green region includes obvious COT spike → manual exclusion needed; (3) Very short green windows (&lt;3 days) → run may be too short for reliable correlation; (4) No green at all for a run → settled=False, check that run's data quality.</span><span class="ru-text"><strong>Тревожные признаки на графике:</strong> (1) Зелёная зона начинается пока подача ещё разгоняется → FEED_SETTLED_FRAC слишком мал; (2) В зелёной зоне виден явный скачок COT → нужно ручное исключение; (3) Очень короткие зелёные окна (&lt;3 дней) → пробег слишком короток для надёжной корреляции; (4) Нет зелёного ни в одном пробеге → settled=False, проверь качество данных.</span></div>
+  </div>
+</div>
+
+<!-- CELL 10: SUMMARY -->
+<div class="sec"><span class="en-text">Cell 10 — Summary printout</span><span class="ru-text">Ячейка 10 — Итоговый вывод</span></div>
+<div class="cell">
+  <div class="cell-header">
+    <span class="cell-num">[ 10 ]</span>
+    <span class="cell-title"><span class="en-text">Final report + suspicious run flagging</span><span class="ru-text">Итоговый отчёт + флаги подозрительных пробегов</span></span>
+    <span class="badge b-run">QA check</span>
+  </div>
+  <div class="cell-body">
+    <div class="bilingual">
+      <div class="bi-en"><div class="bi-label">EN — WHAT TO CHECK</div>
+        <strong>Complete cycles count:</strong> Should be runs that have a decoke on both sides. Incomplete cycles at start/end of the time window are expected — they just mean the dataset starts/ends mid-run.<br><br>
+        <strong>Clean rows %:</strong> Typically 60–70%. Lower means more time spent in decoke/warmup/tail (can be legitimate for a furnace with many short runs).<br><br>
+        <strong>Suspicious runs (warmup or tail > 48h):</strong> These are flagged automatically. A warmup of 48+ hours could mean: (a) operators had trouble settling the furnace, (b) feed data has a long gap at run start, (c) the cracking_mask detected the run start too early. Verify each with DCS before including in analysis.
+      </div>
+      <div class="bi-ru"><div class="bi-label">RU — ЧТО ПРОВЕРЯТЬ</div>
+        <strong>Количество полных циклов:</strong> Должно быть пробегов у которых декокс есть с обеих сторон. Неполные циклы в начале/конце временного окна нормальны — они означают что набор данных начинается/заканчивается в середине пробега.<br><br>
+        <strong>% чистых строк:</strong> Обычно 60–70%. Ниже значит больше времени в декоксе/прогреве/хвосте (может быть нормально для печи с много короткими пробегами).<br><br>
+        <strong>Подозрительные пробеги (прогрев или хвост > 48ч):</strong> Флагуются автоматически. Прогрев 48+ часов может означать: (а) операторы долго выводили печь на режим, (б) данные подачи имеют длинный пробел в начале пробега, (в) cracking_mask обнаружил начало пробега слишком рано. Проверить каждый в DCS перед включением в анализ.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW TO RUN -->
+<div class="sec"><span class="en-text">How to run this notebook</span><span class="ru-text">Как запускать этот ноутбук</span></div>
+<div class="bilingual" style="margin-bottom:16px">
+  <div class="bi-en"><div class="bi-label">EN — SINGLE FURNACE (development / debugging)</div>
+    Open <code>notebooks/00b_clean/notebook_00b_clean_extraction.ipynb</code> in VS Code or Jupyter. Set <code>FURNACE = '1HA'</code> in the parameters cell. Run all cells top to bottom (Kernel → Run All). Check the verification plot. Output goes to <code>output/1HA/00b_clean/</code>.<br><br>
+    <strong>If Databricks is down:</strong> The code checks for a cached <code>1HA_features.parquet</code> first. If that exists, it skips the Databricks step entirely — good for re-running the cleaning logic without re-querying.
+  </div>
+  <div class="bi-ru"><div class="bi-label">RU — ОДНА ПЕЧЬ (разработка / отладка)</div>
+    Открой <code>notebooks/00b_clean/notebook_00b_clean_extraction.ipynb</code> в VS Code или Jupyter. Установи <code>FURNACE = '1HA'</code> в ячейке параметров. Запусти все ячейки сверху вниз (Kernel → Run All). Проверь верификационный график. Вывод идёт в <code>output/1HA/00b_clean/</code>.<br><br>
+    <strong>Если Databricks недоступен:</strong> Код сначала проверяет кэшированный <code>1HA_features.parquet</code>. Если он есть — шаг Databricks полностью пропускается, удобно для повторного запуска логики очистки без повторного запроса.
+  </div>
+</div>
+<div class="bilingual">
+  <div class="bi-en"><div class="bi-label">EN — ALL 7 FURNACES (production run)</div>
+    <code style="display:block;background:var(--code-bg);padding:8px 10px;border-radius:5px;border:1px solid var(--code-border);font-size:10.5px;margin-top:4px">bash run_all_furnaces.sh</code>
+    This runs all 7 furnaces in parallel using papermill. Each gets its own FURNACE parameter injected. Logs in <code>output/logs/*.log</code>. Duration: ~10–20 min for all 7 if cluster is warm. Executed notebooks saved to <code>output/logs/notebook_00b_1HA.ipynb</code> etc — you can open these in Jupyter to see the actual output for each furnace.
+  </div>
+  <div class="bi-ru"><div class="bi-label">RU — ВСЕ 7 ПЕЧЕЙ (производственный запуск)</div>
+    <code style="display:block;background:var(--code-bg);padding:8px 10px;border-radius:5px;border:1px solid var(--code-border);font-size:10.5px;margin-top:4px">bash run_all_furnaces.sh</code>
+    Запускает все 7 печей параллельно через papermill. В каждую подставляется свой параметр FURNACE. Логи в <code>output/logs/*.log</code>. Время: ~10–20 мин на все 7 при разогретом кластере. Выполненные ноутбуки сохраняются в <code>output/logs/notebook_00b_1HA.ipynb</code> и т.д. — можно открыть в Jupyter чтобы увидеть реальный вывод для каждой печи.
+  </div>
+</div>
+
+<div class="footer">
+  <span class="en-text">olefins_ddf · Indorama Eleme · docs/notebook_00b_explained.html · Read alongside: docs/tag_map.html · docs/full_analysis_structure.html</span>
+  <span class="ru-text">olefins_ddf · Indorama Eleme · docs/notebook_00b_explained.html · Читать вместе с: docs/tag_map.html · docs/full_analysis_structure.html</span>
+</div>
+
+<script>
+let lang='en';
+function toggleLang(){
+  lang=lang==='en'?'ru':'en';
+  document.querySelectorAll('.en-text').forEach(el=>el.style.display=lang==='en'?'':'none');
+  document.querySelectorAll('.ru-text').forEach(el=>el.style.display=lang==='ru'?'':'none');
+  document.querySelector('.lang-btn').textContent=lang==='en'?'RU / EN':'EN / RU';
+}
+document.querySelectorAll('.ru-text').forEach(el=>el.style.display='none');
+</script>
+</body>
+</html>
