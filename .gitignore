@@ -4,11 +4,13 @@
 
 # data exports / generated artifacts
 *.xlsx
-output/
-*.parquet
-*.csv
+*.parquet   # time series data — never commit, always in Databricks Delta tables
 *.pdf
 *.docx
+
+# output/ is tracked — PNG plots and summary CSVs go into git
+# only exclude raw/aggregated data files inside output/
+output/**/*.parquet
 
 # python
 __pycache__/
