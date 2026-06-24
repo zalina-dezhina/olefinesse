@@ -35,3 +35,6 @@ venv/
 
 # Claude Code — keep shared settings.json trackable, ignore personal overrides
 .claude/settings.local.json
+
+# Notebook-local output dirs (wrong location — outputs belong in root output/)
+notebooks/*/output/

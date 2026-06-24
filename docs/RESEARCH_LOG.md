@@ -57,7 +57,6 @@ margin. Source docs in `context/`.
 
 **Notebook created:** `notebook_02_binned_correlations.ipynb`
 
-**Method — Harry's phase-bin approach:**
 Split each run's clean analysis window (from `output/run_analysis_windows.csv`) into consecutive
 5-day phase bins. For each bin, compute Spearman rank correlation between every driver and
 `dd_abs_max`. Compare trajectories across bins to separate causal from feedback effects.
